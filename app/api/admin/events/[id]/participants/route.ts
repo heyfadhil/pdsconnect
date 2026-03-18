@@ -12,8 +12,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const { data, error } = await adminSupabase
     .from("event_participants")
     .select(
-      `id, role_in_event, is_active, categories, tags,
-       users (id, email, name, company_name, logo_url, is_active, industry_id, industries(name))`
+      `id, role_in_event, is_active,
+       users (id, email, name, company_name, logo_url, is_active, industries(name))`
     )
     .eq("event_id", eventId)
     .order("id", { ascending: false });
@@ -23,8 +23,6 @@ export async function GET(_req: NextRequest, { params }: Params) {
 }
 
 // POST — add one or many users to the event
-// Body: { user_id, role_in_event, send_email }  (single)
-//    or { user_ids: string[], send_email }        (bulk — uses each user's own role)
 export async function POST(request: NextRequest, { params }: Params) {
   const { id: eventId } = await params;
   const supabase = await createClient();
@@ -33,74 +31,76 @@ export async function POST(request: NextRequest, { params }: Params) {
   const body = await request.json();
   const send_email: boolean = body.send_email ?? false;
 
-  // Normalise to array of { user_id }
-  let targets: { user_id: string }[];
-  if (Array.isArray(body.user_ids)) {
-    targets = body.user_ids.map((id: string) => ({ user_id: id }));
+  // Normalise to array of user_ids
+  let userIds: string[];
+  if (Array.isArray(body.user_ids) && body.user_ids.length > 0) {
+    userIds = body.user_ids;
   } else if (body.user_id) {
-    targets = [{ user_id: body.user_id }];
+    userIds = [body.user_id];
   } else {
     return NextResponse.json({ error: "user_id or user_ids required." }, { status: 400 });
   }
 
-  // Fetch all target users' profiles + their roles
-  const userIds = targets.map((t) => t.user_id);
-  const { data: userProfiles } = await adminSupabase
+  // Fetch user profiles
+  const { data: userProfiles, error: profilesErr } = await adminSupabase
     .from("users")
     .select("id, email, name, role, is_active")
     .in("id", userIds);
 
+  if (profilesErr) return NextResponse.json({ error: profilesErr.message }, { status: 500 });
+
   const profileMap = new Map((userProfiles ?? []).map((u) => [u.id, u]));
 
-  // Get event info (for emails)
+  // Get event info for emails
   const { data: event } = await supabase
     .from("events")
     .select("name, event_start_date, venue_name")
     .eq("id", eventId)
     .single();
 
-  // Check existing participants to skip duplicates
-  const { data: existing } = await adminSupabase
-    .from("event_participants")
-    .select("user_id, id, is_active")
-    .eq("event_id", eventId)
-    .in("user_id", userIds);
-
-  const existingMap = new Map((existing ?? []).map((e) => [e.user_id, e]));
-
   let added = 0;
   let reactivated = 0;
   const errors: { user_id: string; error: string }[] = [];
 
-  for (const { user_id } of targets) {
+  for (const user_id of userIds) {
     const profile = profileMap.get(user_id);
     if (!profile) { errors.push({ user_id, error: "User not found." }); continue; }
 
-    const role_in_event = profile.role === "buyer" || profile.role === "seller" ? profile.role : null;
-    if (!role_in_event) { errors.push({ user_id, error: "User role must be buyer or seller." }); continue; }
+    const role_in_event = (profile.role === "buyer" || profile.role === "seller") ? profile.role : null;
+    if (!role_in_event) { errors.push({ user_id, error: `Role "${profile.role}" must be buyer or seller.` }); continue; }
 
-    const existingEntry = existingMap.get(user_id);
+    // Check if already a participant
+    const { data: existing } = await adminSupabase
+      .from("event_participants")
+      .select("id, is_active")
+      .eq("event_id", eventId)
+      .eq("user_id", user_id)
+      .maybeSingle();
 
-    if (existingEntry) {
-      if (!existingEntry.is_active) {
+    if (existing) {
+      if (!existing.is_active) {
         await adminSupabase
           .from("event_participants")
           .update({ is_active: true, role_in_event })
-          .eq("id", existingEntry.id);
+          .eq("id", existing.id);
         reactivated++;
       }
-      // already active — skip silently
+      // already active — skip
       continue;
     }
 
+    // Insert new participant
     const { error: insertErr } = await adminSupabase
       .from("event_participants")
       .insert({ event_id: eventId, user_id, role_in_event, is_active: true });
 
-    if (insertErr) { errors.push({ user_id, error: insertErr.message }); continue; }
+    if (insertErr) {
+      errors.push({ user_id, error: insertErr.message });
+      continue;
+    }
     added++;
 
-    // Send email if requested
+    // Send email notification if requested
     if (send_email && profile.is_active && profile.email && event) {
       try {
         const resendKey = process.env.RESEND_API_KEY;

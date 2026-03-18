@@ -44,12 +44,15 @@ export default function ParticipantsPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
   const [bulkResult, setBulkResult] = useState<{ added: number; reactivated: number; errors: { user_id: string; error: string }[] } | null>(null);
+  const [loadError, setLoadError] = useState("");
 
   const load = useCallback(async () => {
+    setLoadError("");
     const [partRes, usersRes] = await Promise.all([
       fetch(`/api/admin/events/${eventId}/participants`).then((r) => r.json()),
       fetch("/api/admin/users").then((r) => r.json()),
     ]);
+    if (partRes.error) setLoadError(`Failed to load participants: ${partRes.error}`);
     setParticipants(partRes.participants ?? []);
     setAllUsers(usersRes.users ?? []);
     setLoading(false);
@@ -164,6 +167,7 @@ export default function ParticipantsPage() {
   const selectedCount = [...selected].filter((id) => addCandidates.some((u) => u.id === id)).length;
 
   if (loading) return <div className="p-8 text-mid-gray text-sm">Loading...</div>;
+  if (loadError) return <div className="p-8 text-red-600 text-sm bg-red-50 rounded-xl border border-red-200">{loadError}</div>;
 
   return (
     <div className="p-8 max-w-5xl">
@@ -329,11 +333,19 @@ export default function ParticipantsPage() {
 
               {/* Bulk result banner */}
               {bulkResult && (
-                <div className="px-6 py-3 bg-emerald-50 border-b border-emerald-100 shrink-0">
-                  <p className="text-sm font-semibold text-emerald-700">
-                    {bulkResult.added} added{bulkResult.reactivated > 0 ? `, ${bulkResult.reactivated} reactivated` : ""}
-                    {bulkResult.errors.length > 0 ? ` · ${bulkResult.errors.length} failed` : ""}
+                <div className={`px-6 py-3 border-b shrink-0 ${bulkResult.added > 0 || bulkResult.reactivated > 0 ? "bg-emerald-50 border-emerald-100" : "bg-red-50 border-red-100"}`}>
+                  <p className={`text-sm font-semibold ${bulkResult.added > 0 || bulkResult.reactivated > 0 ? "text-emerald-700" : "text-red-700"}`}>
+                    {bulkResult.added > 0 || bulkResult.reactivated > 0
+                      ? `${bulkResult.added} added${bulkResult.reactivated > 0 ? `, ${bulkResult.reactivated} reactivated` : ""}`
+                      : "No participants added"}
                   </p>
+                  {bulkResult.errors.length > 0 && (
+                    <div className="mt-1 space-y-0.5">
+                      {bulkResult.errors.map((e, i) => (
+                        <p key={i} className="text-xs text-red-600">{e.error}</p>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
