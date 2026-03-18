@@ -16,6 +16,7 @@ type FormState = {
   matchup_close_date: string;
   max_matches_per_buyer: string;
   max_matches_per_seller: string;
+  thumbnail_url: string;
 };
 
 const initial: FormState = {
@@ -23,6 +24,7 @@ const initial: FormState = {
   event_start_date: "", event_end_date: "",
   matchup_open_date: "", matchup_close_date: "",
   max_matches_per_buyer: "", max_matches_per_seller: "",
+  thumbnail_url: "",
 };
 
 export default function NewEventPage() {
@@ -96,6 +98,14 @@ export default function NewEventPage() {
               <label className={labelClass}>Venue Address</label>
               <input value={form.venue_address} onChange={set("venue_address")} placeholder="Full address" className={inputClass} />
             </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>Thumbnail URL <span className="font-normal text-mid-gray">(optional)</span></label>
+            <input value={form.thumbnail_url} onChange={set("thumbnail_url")} placeholder="https://…" className={inputClass} />
+            {form.thumbnail_url && (
+              <img src={form.thumbnail_url} alt="Thumbnail preview" className="mt-2 h-20 w-auto rounded-lg border border-light-border object-cover" />
+            )}
           </div>
         </div>
 

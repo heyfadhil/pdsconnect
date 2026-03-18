@@ -11,7 +11,7 @@ type Event = {
   event_start_date: string | null; event_end_date: string | null;
   matchup_open_date: string | null; matchup_close_date: string | null;
   max_matches_per_buyer: number | null; max_matches_per_seller: number | null;
-  status: string;
+  status: string; thumbnail_url: string | null;
 };
 
 const statusStyle: Record<string, string> = {
@@ -108,6 +108,7 @@ export default function EventDetailPage() {
           { label: "Matches", href: `/admin/events/${id}/matches` },
           { label: "Assign Participants (AI)", href: `/admin/events/${id}/assign` },
           { label: "Itinerary", href: `/admin/events/${id}/itinerary` },
+          { label: "Calendar", href: `/admin/events/${id}/calendar` },
         ].map((link) => (
           <Link key={link.href} href={link.href} className="px-4 py-2 rounded-lg bg-white border border-light-border text-sm font-medium text-ink-gray hover:border-calm-blue hover:text-calm-blue transition-all shadow-sm">
             {link.label} →
@@ -139,6 +140,13 @@ export default function EventDetailPage() {
                 <div><label className={labelClass}>Max Matches / Buyer</label><input type="number" min="1" value={form.max_matches_per_buyer ?? ""} onChange={set("max_matches_per_buyer")} placeholder="No limit" className={inputClass} /></div>
                 <div><label className={labelClass}>Max Matches / Seller</label><input type="number" min="1" value={form.max_matches_per_seller ?? ""} onChange={set("max_matches_per_seller")} placeholder="No limit" className={inputClass} /></div>
               </div>
+              <div>
+                <label className={labelClass}>Thumbnail URL</label>
+                <input value={form.thumbnail_url ?? ""} onChange={set("thumbnail_url")} placeholder="https://…" className={inputClass} />
+                {form.thumbnail_url && (
+                  <img src={form.thumbnail_url} alt="Thumbnail preview" className="mt-2 h-20 w-auto rounded-lg border border-light-border object-cover" />
+                )}
+              </div>
               {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>}
               <div className="flex gap-3 pt-2">
                 <button onClick={handleSave} disabled={saving} className="px-5 py-2 rounded-lg bg-calm-blue text-white text-sm font-semibold hover:bg-deep-blue transition-colors disabled:opacity-50">{saving ? "Saving..." : "Save Changes"}</button>
@@ -166,6 +174,12 @@ export default function EventDetailPage() {
                 <div className="md:col-span-2">
                   <p className="text-[12px] font-semibold text-mid-gray uppercase tracking-wide">Description</p>
                   <p className="text-sm text-ink-gray mt-0.5 leading-relaxed">{event.description}</p>
+                </div>
+              )}
+              {event.thumbnail_url && (
+                <div className="md:col-span-2">
+                  <p className="text-[12px] font-semibold text-mid-gray uppercase tracking-wide mb-1.5">Thumbnail</p>
+                  <img src={event.thumbnail_url} alt="Event thumbnail" className="h-28 w-auto rounded-xl border border-light-border object-cover" />
                 </div>
               )}
             </div>

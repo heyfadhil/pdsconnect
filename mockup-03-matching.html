@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDS Connect — Business Matching</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #2E7FD9; --sky: #5BABF0; --deep: #1A5FAA;
+    --cyan: #06B6D4; --ecyan: #00D4FF; --teal: #14B8A6; --dteal: #0D9488;
+    --cyanT: #ECFEFF; --paleT: #EEF5FC; --border: #D8E6F5;
+    --ink: #3A3A3A; --mid: #8A8A8A; --carbon: #0D0D0D; --white: #FFFFFF;
+    --bg: #EBF9FC; --grad: linear-gradient(135deg, #2E7FD9 0%, #06B6D4 55%, #14B8A6 100%);
+    --sidebar: #06101E;
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); display: flex; height: 100vh; overflow: hidden; color: var(--carbon); }
+
+  /* SIDEBAR (same compact style) */
+  .sidebar { width: 72px; height: 100vh; flex-shrink: 0; background: var(--sidebar); border-right: 1px solid rgba(0,212,255,0.10); display: flex; flex-direction: column; align-items: center; padding: 16px 0; gap: 4px; z-index: 10; transition: width 0.22s ease; }
+  .sidebar:hover { width: 220px; }
+  .sidebar-logo { width: 42px; height: 42px; border-radius: 10px; background: var(--grad); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; flex-shrink: 0; box-shadow: 0 0 16px rgba(6,182,212,0.35); }
+  .sidebar-logo svg { width: 22px; height: 22px; stroke: white; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  .nav-section { width: 100%; padding: 0 12px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; height: 44px; border-radius: 10px; padding: 0 11px; cursor: pointer; transition: all 0.12s; white-space: nowrap; overflow: hidden; color: rgba(255,255,255,0.45); }
+  .nav-item:hover { background: rgba(0,212,255,0.10); color: rgba(255,255,255,0.90); }
+  .nav-item.active { background: rgba(0,212,255,0.12); color: white; font-weight: 600; border-left: 3px solid var(--ecyan); }
+  .nav-item.active .nav-icon { color: var(--ecyan); }
+  .nav-icon { width: 20px; height: 20px; flex-shrink: 0; }
+  .nav-icon svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .nav-text { font-size: 13px; font-weight: 500; opacity: 0; transition: opacity 0.12s; white-space: nowrap; }
+  .sidebar:hover .nav-text { opacity: 1; }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* TOPBAR */
+  .topbar { height: 64px; flex-shrink: 0; background: rgba(255,255,255,0.88); backdrop-filter: blur(20px) saturate(1.6); border-bottom: 1px solid rgba(6,182,212,0.12); display: flex; align-items: center; padding: 0 32px; gap: 20px; }
+  .breadcrumb { flex: 1; }
+  .breadcrumb-parent { font-size: 12px; color: var(--mid); }
+  .breadcrumb-current { font-size: 18px; font-weight: 700; color: var(--carbon); font-family: 'Sora',sans-serif; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .icon-btn { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: var(--paleT); border: 1px solid var(--border); cursor: pointer; position: relative; transition: all 0.15s cubic-bezier(0.34,1.56,0.64,1); }
+  .icon-btn:hover { background: var(--cyanT); border-color: var(--cyan); transform: scale(1.1); box-shadow: 0 0 12px rgba(6,182,212,0.25); }
+  .icon-btn svg { width: 18px; height: 18px; stroke: var(--blue); fill: none; stroke-width: 1.8; stroke-linecap: round; }
+  .notif-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--ecyan); border: 2px solid white; box-shadow: 0 0 6px rgba(0,212,255,0.6); }
+  .avatar-ring { width: 38px; height: 38px; border-radius: 50%; background: var(--grad); padding: 2px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .avatar-inner { width: 100%; height: 100%; border-radius: 50%; background: #1A5FAA; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 13px; }
+
+  /* LAYOUT */
+  .match-layout { flex: 1; display: grid; grid-template-columns: 1fr 380px; overflow: hidden; gap: 0; }
+
+  /* LEFT — card grid */
+  .match-grid-panel { overflow-y: auto; padding: 24px 24px 24px 32px; display: flex; flex-direction: column; gap: 20px; }
+
+  /* Filter bar */
+  .filter-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .filter-label { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .filter-chip {
+    padding: 7px 16px; border-radius: 99px; font-size: 12px; font-weight: 600; cursor: pointer;
+    border: 1.5px solid var(--border); background: white; color: var(--mid);
+    transition: all 0.12s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .filter-chip:hover { border-color: var(--cyan); color: var(--cyan); background: var(--cyanT); transform: scale(1.04); }
+  .filter-chip.active { background: var(--grad); color: white; border-color: transparent; box-shadow: 0 4px 14px rgba(6,182,212,0.30); }
+  .search-match { display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 14px; border-radius: 10px; border: 1.5px solid var(--border); background: white; margin-left: auto; min-width: 220px; transition: all 0.15s; }
+  .search-match:focus-within { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(6,182,212,0.15); }
+  .search-match svg { width: 15px; height: 15px; stroke: var(--mid); fill: none; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
+  .search-match input { border: none; outline: none; font-size: 13px; color: var(--ink); background: transparent; width: 100%; }
+
+  /* Cards grid */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .match-card {
+    background: white; border-radius: 18px; border: 1px solid var(--border); overflow: hidden;
+    cursor: pointer; transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+  }
+  .match-card:hover { transform: translateY(-7px) scale(1.01); box-shadow: 0 16px 44px rgba(6,182,212,0.20); border-color: var(--cyan); }
+  .match-card.selected { border-color: var(--ecyan); border-width: 2px; box-shadow: 0 0 0 3px rgba(0,212,255,0.15), 0 12px 36px rgba(6,182,212,0.20); transform: translateY(-5px); }
+  .card-accent-bar { height: 4px; background: var(--grad); }
+  .card-accent-bar.teal { background: linear-gradient(90deg,#14B8A6,#06B6D4); }
+  .card-accent-bar.deep { background: linear-gradient(90deg,#1A5FAA,#2E7FD9); }
+
+  .card-body { padding: 18px 20px 20px; }
+  .card-header-row { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+  .company-logo { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: white; flex-shrink: 0; border: 2px solid var(--cyanT); }
+  .score-badge {
+    padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 800;
+    background: var(--grad); color: white;
+    box-shadow: 0 2px 12px rgba(6,182,212,0.40);
+    transition: box-shadow 0.22s;
+  }
+  .match-card:hover .score-badge { box-shadow: 0 4px 20px rgba(6,182,212,0.60); }
+  .score-badge.high { background: linear-gradient(135deg,#14B8A6,#06B6D4); }
+  .score-badge.med { background: linear-gradient(135deg,#2E7FD9,#5BABF0); }
+
+  .company-name { font-family: 'Sora',sans-serif; font-size: 17px; font-weight: 700; color: var(--carbon); margin-bottom: 4px; }
+  .company-tagline { font-size: 12px; color: var(--mid); margin-bottom: 12px; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .tag { padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: var(--cyanT); color: var(--cyan); transition: all 0.12s cubic-bezier(0.34,1.56,0.64,1); cursor: default; }
+  .tag:hover { background: var(--cyan); color: white; transform: scale(1.06); }
+  .tag.teal { background: rgba(20,184,166,0.10); color: var(--teal); }
+  .tag.teal:hover { background: var(--teal); color: white; }
+
+  .card-stats { display: flex; gap: 16px; padding: 12px 0; border-top: 1px solid var(--border); margin-bottom: 14px; }
+  .stat-mini { text-align: center; flex: 1; }
+  .stat-mini-val { font-size: 16px; font-weight: 700; color: var(--carbon); font-family: 'Sora',sans-serif; }
+  .stat-mini-label { font-size: 10px; color: var(--mid); }
+
+  .status-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .status-dot-label { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink); font-weight: 500; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-active { background: var(--teal); box-shadow: 0 0 6px var(--teal); animation: pulse 2s infinite; }
+  .dot-pending { background: #F59E0B; }
+  .viewed { font-size: 11px; color: var(--mid); }
+
+  .connect-btn {
+    width: 100%; padding: 12px; border-radius: 10px; border: none; cursor: pointer;
+    background: var(--grad); color: white; font-weight: 700; font-size: 14px;
+    font-family: 'Inter',sans-serif; letter-spacing: 0.01em;
+    box-shadow: 0 4px 16px rgba(6,182,212,0.30);
+    transition: all 0.15s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative; overflow: hidden;
+  }
+  .connect-btn::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent); transform:translateX(-100%); transition:transform 0.35s ease; }
+  .connect-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(6,182,212,0.50); }
+  .connect-btn:hover::after { transform: translateX(100%); }
+  .connect-btn:active { transform: scale(0.97); }
+
+  /* RIGHT PANEL — Detail */
+  .detail-panel {
+    background: white; border-left: 1px solid rgba(6,182,212,0.12);
+    display: flex; flex-direction: column; overflow-y: auto;
+  }
+  .detail-hero {
+    background: var(--aurora-sm);
+    background: linear-gradient(160deg, #06101E 0%, #0D2A4A 100%);
+    padding: 28px 28px 20px; position: relative; overflow: hidden;
+  }
+  .detail-hero::before {
+    content:''; position:absolute; inset:0;
+    background: radial-gradient(ellipse at 80% 20%, rgba(6,182,212,0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, rgba(46,127,217,0.20) 0%, transparent 60%);
+  }
+  .detail-hero-content { position: relative; z-index: 1; }
+  .detail-logo { width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg,#2E7FD9,#06B6D4); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 22px; color: white; margin-bottom: 14px; box-shadow: 0 8px 24px rgba(6,182,212,0.40); border: 2px solid rgba(0,212,255,0.30); }
+  .detail-name { font-family: 'Sora',sans-serif; font-size: 22px; font-weight: 800; color: white; margin-bottom: 4px; }
+  .detail-tagline { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 16px; }
+  .detail-big-score {
+    display: inline-flex; align-items: baseline; gap: 4px;
+    background: rgba(0,212,255,0.12); border: 1px solid rgba(0,212,255,0.25);
+    padding: 6px 16px; border-radius: 99px;
+  }
+  .detail-big-score .score-num { font-family: 'Sora',sans-serif; font-size: 28px; font-weight: 800; color: var(--ecyan); text-shadow: 0 0 20px rgba(0,212,255,0.5); }
+  .detail-big-score .score-label { font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 600; }
+  .detail-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .detail-tag { padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; background: rgba(6,182,212,0.15); color: var(--ecyan); border: 1px solid rgba(0,212,255,0.20); }
+
+  .detail-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+  .detail-section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: var(--mid); margin-bottom: 10px; }
+
+  .detail-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .detail-kpi { background: var(--paleT); border-radius: 12px; padding: 12px 14px; border: 1px solid var(--border); transition: all 0.15s; }
+  .detail-kpi:hover { background: var(--cyanT); border-color: rgba(6,182,212,0.25); }
+  .detail-kpi-val { font-family: 'Sora',sans-serif; font-size: 22px; font-weight: 800; color: var(--carbon); }
+  .detail-kpi-label { font-size: 11px; color: var(--mid); margin-top: 2px; }
+
+  .detail-info-rows { display: flex; flex-direction: column; gap: 8px; }
+  .detail-info-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; background: var(--paleT); transition: background 0.1s; }
+  .detail-info-row:hover { background: var(--cyanT); }
+  .detail-info-row svg { width: 14px; height: 14px; stroke: var(--cyan); fill: none; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
+  .detail-info-row span { font-size: 13px; color: var(--ink); }
+  .detail-info-row strong { color: var(--carbon); font-weight: 600; }
+
+  .compat-bars { display: flex; flex-direction: column; gap: 8px; }
+  .compat-bar-item { }
+  .compat-bar-labels { display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .compat-bar-name { font-size: 12px; color: var(--ink); }
+  .compat-bar-pct { font-size: 12px; font-weight: 600; color: var(--cyan); }
+  .compat-track { height: 5px; border-radius: 99px; background: var(--border); }
+  .compat-fill { height: 100%; border-radius: 99px; background: var(--grad); transition: width 0.8s ease-out; }
+
+  .action-btns { display: flex; flex-direction: column; gap: 10px; }
+  .btn-detail-primary { width: 100%; padding: 14px; border-radius: 10px; border: none; cursor: pointer; background: var(--grad); color: white; font-weight: 700; font-size: 14px; font-family: 'Inter',sans-serif; box-shadow: 0 4px 20px rgba(6,182,212,0.35); transition: all 0.15s cubic-bezier(0.34,1.56,0.64,1); }
+  .btn-detail-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(6,182,212,0.55); }
+  .btn-detail-primary:active { transform: scale(0.97); }
+  .btn-detail-ghost { width: 100%; padding: 12px; border-radius: 10px; cursor: pointer; background: transparent; color: var(--cyan); font-weight: 600; font-size: 14px; font-family: 'Inter',sans-serif; border: 1.5px solid var(--cyan); transition: all 0.15s; }
+  .btn-detail-ghost:hover { background: var(--cyanT); }
+  .btn-detail-ghost:active { transform: scale(0.97); }
+
+  .avatar-stack { display: flex; align-items: center; }
+  .av-small { width: 26px; height: 26px; border-radius: 50%; border: 2px solid white; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: white; }
+  .av-small:not(:first-child) { margin-left: -8px; }
+  .av-more { background: var(--cyanT); color: var(--cyan); border-color: var(--cyanT); font-weight: 700; font-size: 9px; }
+  .av-count-label { font-size: 11px; color: var(--mid); margin-left: 8px; }
+
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="12" r="3"/><path d="M9 12h6"/><circle cx="12" cy="8" r="1.5" fill="white" stroke="none"/></svg>
+  </div>
+  <div class="nav-section">
+    <div class="nav-item">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div>
+      <span class="nav-text">Dashboard</span>
+    </div>
+    <div class="nav-item active">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <span class="nav-text">Matches</span>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+      <span class="nav-text">Messages</span>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+      <span class="nav-text">Analytics</span>
+    </div>
+  </div>
+  <div style="flex:1"></div>
+  <div class="nav-section">
+    <div class="nav-item">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg></div>
+      <span class="nav-text">Profile</span>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+      <span class="nav-text">Settings</span>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="breadcrumb">
+      <div class="breadcrumb-parent">PDS Connect</div>
+      <div class="breadcrumb-current">Business Matches</div>
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><div class="notif-dot"></div></div>
+      <div class="avatar-ring"><div class="avatar-inner">F</div></div>
+    </div>
+  </div>
+
+  <div class="match-layout">
+    <!-- LEFT: grid panel -->
+    <div class="match-grid-panel">
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <span class="filter-label">Filter:</span>
+        <div class="filter-chip active">All Matches</div>
+        <div class="filter-chip">SaaS / Tech</div>
+        <div class="filter-chip">FinTech</div>
+        <div class="filter-chip">CleanTech</div>
+        <div class="filter-chip">90%+ Score</div>
+        <div class="search-match">
+          <svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search companies...">
+        </div>
+      </div>
+
+      <!-- Result count -->
+      <div style="font-size:13px;color:var(--mid)"><strong style="color:var(--carbon)">24 matches</strong> found for your profile · Sorted by compatibility</div>
+
+      <!-- Cards grid -->
+      <div class="cards-grid">
+
+        <!-- Card 1 — Selected -->
+        <div class="match-card selected" onclick="selectCard(this, 'AT')">
+          <div class="card-accent-bar"></div>
+          <div class="card-body">
+            <div class="card-header-row">
+              <div class="company-logo" style="background:linear-gradient(135deg,#2E7FD9,#06B6D4)">AT</div>
+              <div class="score-badge">98%</div>
+            </div>
+            <div class="company-name">Apex Technologies</div>
+            <div class="company-tagline">Enterprise SaaS · Series B · $42M ARR</div>
+            <div class="tags">
+              <span class="tag">SaaS</span>
+              <span class="tag">Enterprise</span>
+              <span class="tag teal">Partnership Ready</span>
+            </div>
+            <div class="card-stats">
+              <div class="stat-mini"><div class="stat-mini-val">$42M</div><div class="stat-mini-label">ARR</div></div>
+              <div class="stat-mini"><div class="stat-mini-val">340</div><div class="stat-mini-label">Employees</div></div>
+              <div class="stat-mini"><div class="stat-mini-val">12</div><div class="stat-mini-label">Countries</div></div>
+            </div>
+            <div class="status-row">
+              <div class="status-dot-label"><div class="dot dot-active"></div> Actively Matching</div>
+              <div class="viewed">Viewed 2h ago</div>
+            </div>
+            <button class="connect-btn" onclick="event.stopPropagation()">Connect Now →</button>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="match-card" onclick="selectCard(this,'NV')">
+          <div class="card-accent-bar teal"></div>
+          <div class="card-body">
+            <div class="card-header-row">
+              <div class="company-logo" style="background:linear-gradient(135deg,#14B8A6,#06B6D4)">NV</div>
+              <div class="score-badge high">94%</div>
+            </div>
+            <div class="company-name">NovaBridge Ventures</div>
+            <div class="company-tagline">FinTech Infrastructure · Series A · $18M ARR</div>
+            <div class="tags">
+              <span class="tag">FinTech</span>
+              <span class="tag teal">B2B</span>
+              <span class="tag">API-first</span>
+            </div>
+            <div class="card-stats">
+              <div class="stat-mini"><div class="stat-mini-val">$18M</div><div class="stat-mini-label">ARR</div></div>
+              <div class="stat-mini"><div class="stat-mini-val">120</div><div class="stat-mini-label">Employees</div></div>
+              <div class="stat-mini"><div class="stat-mini-val">6</div><div class="stat-mini-label">Countries</div></div>
+            </div>
+            <div class="status-row">
+              <div class="status-dot-label"><div class="dot dot-active"></div> Actively Matching</div>
+              <div class="viewed">Viewed 1d ago</div>
+            </div>
+            <button class="connect-btn" onclick="event.stopPropagation()">Connect Now →</button>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="match-card" onclick="selectCard(this,'CG')">
+          <div class="card-accent-bar deep"></div>
+          <div class="card-body">
+            <div class="card-header-row">
+              <div class="company-logo" style="background:linear-gradient(135deg,#1A5FAA,#2E7FD9)">CG</div>
+              <div class="score-badge med">91%</div>
+            </div>
+            <div class="company-name">ClearGrid Energy</div>
+            <div class="company-tagline">CleanTech · Growth Stage · $8M Revenue</div>
+            <div class="tags">
+              <span class="tag">CleanTech</span>
+              <span class="tag teal">ESG Aligned</span>
+            </div>
+            <div class="card-stats">
+              <div class="stat-mini"><div class="stat-mini-val">$8M</div><div class="stat-mini-label">Revenue</div></div>
+              <div class="stat-mini"><div class="stat-mini-val">85</div><div class="stat-mini-label">Employees</div></div>
+              <div class="stat-mini"><div class="stat-mini-val">4</div><div class="stat-mini-label">Markets</div></div>
+            </div>
+            <div class="status-row">
+              <div class="status-dot-label"><div class="dot dot-pending"></div> In Review</div>
+              <div class="viewed">Viewed 3d ago</div>
+            </div>
+            <button class="connect-btn" onclick="event.stopPropagation()">Connect Now →</button>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="match-card" onclick="selectCard(this,'MF')">
+          <div class="card-accent-bar"></div>
+          <div class="card-body">
+            <div class="card-header-row">
+              <div class="company-logo" style="background:linear-gradient(135deg,#06B6D4,#14B8A6)">MF</div>
+              <div class="score-badge">88%</div>
+            </div>
+            <div class="company-name">Meridian Funds</div>
+            <div class="company-tagline">Private Equity · Growth Investments</div>
+            <div class="tags">
+              <span class="tag">PE</span>
+              <span class="tag">Investment</span>
+              <span class="tag teal">Strategic</span>
+            </div>
+            <div class="card-stats">
+              <div class="stat-mini"><div class="stat-mini-val">$2.4B</div><div class="stat-mini-label">AUM</div></div>
+              <div class="stat-mini"><div class="stat-mini-val">48</div><div class="stat-mini-label">Portfolio</div></div>
+              <div class="stat-mini"><div class="stat-mini-val">22</div><div class="stat-mini-label">Countries</div></div>
+            </div>
+            <div class="status-row">
+              <div class="status-dot-label"><div class="dot dot-active"></div> Actively Matching</div>
+              <div class="viewed">Viewed 5d ago</div>
+            </div>
+            <button class="connect-btn" onclick="event.stopPropagation()">Connect Now →</button>
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="match-card" onclick="selectCard(this,'VS')">
+          <div class="card-accent-bar teal"></div>
+          <div class="card-body">
+            <div class="card-header-row">
+              <div class="company-logo" style="background:linear-gradient(135deg,#0D9488,#14B8A6)">VS</div>
+              <div class="score-badge high">85%</div>
+            </div>
+            <div class="company-name">Vertex Systems</div>
+            <div class="company-tagline">ERP & Integration · SME Focus</div>
+            <div class="tags">
+              <span class="tag">ERP</span>
+              <span class="tag teal">Integration</span>
+            </div>
+            <div class="card-stats">
+              <div class="stat-mini"><div class="stat-mini-val">$5M</div><div class="stat-mini-label">ARR</div></div>
+              <div class="stat-mini"><div class="stat-mini-val">60</div><div class="stat-mini-label">Employees</div></div>
+              <div class="stat-mini"><div class="stat-mini-val">3</div><div class="stat-mini-label">Markets</div></div>
+            </div>
+            <div class="status-row">
+              <div class="status-dot-label"><div class="dot dot-active"></div> Actively Matching</div>
+              <div class="viewed">Viewed 1w ago</div>
+            </div>
+            <button class="connect-btn" onclick="event.stopPropagation()">Connect Now →</button>
+          </div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="match-card" onclick="selectCard(this,'DP')">
+          <div class="card-accent-bar deep"></div>
+          <div class="card-body">
+            <div class="card-header-row">
+              <div class="company-logo" style="background:linear-gradient(135deg,#2E7FD9,#1A5FAA)">DP</div>
+              <div class="score-badge med">82%</div>
+            </div>
+            <div class="company-name">DataPath AI</div>
+            <div class="company-tagline">AI/ML Infrastructure · Series A</div>
+            <div class="tags">
+              <span class="tag">AI / ML</span>
+              <span class="tag">Infrastructure</span>
+            </div>
+            <div class="card-stats">
+              <div class="stat-mini"><div class="stat-mini-val">$12M</div><div class="stat-mini-label">ARR</div></div>
+              <div class="stat-mini"><div class="stat-mini-val">95</div><div class="stat-mini-label">Employees</div></div>
+              <div class="stat-mini"><div class="stat-mini-val">8</div><div class="stat-mini-label">Countries</div></div>
+            </div>
+            <div class="status-row">
+              <div class="status-dot-label"><div class="dot dot-pending"></div> Reviewing</div>
+              <div class="viewed">New match</div>
+            </div>
+            <button class="connect-btn" onclick="event.stopPropagation()">Connect Now →</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: Detail panel -->
+    <div class="detail-panel" id="detail-panel">
+      <div class="detail-hero">
+        <div class="detail-hero-content">
+          <div class="detail-logo" id="detail-logo">AT</div>
+          <div class="detail-name" id="detail-name">Apex Technologies</div>
+          <div class="detail-tagline" id="detail-tagline">Enterprise SaaS · Series B · Founded 2018</div>
+          <div class="detail-big-score">
+            <span class="score-num" id="detail-score">98%</span>
+            <span class="score-label">match</span>
+          </div>
+          <div class="detail-tags">
+            <span class="detail-tag">SaaS</span>
+            <span class="detail-tag">Enterprise</span>
+            <span class="detail-tag">Global</span>
+            <span class="detail-tag">Series B</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-body">
+        <!-- KPIs -->
+        <div>
+          <div class="detail-section-title">Key Metrics</div>
+          <div class="detail-kpis">
+            <div class="detail-kpi"><div class="detail-kpi-val">$42M</div><div class="detail-kpi-label">Annual Revenue</div></div>
+            <div class="detail-kpi"><div class="detail-kpi-val">340</div><div class="detail-kpi-label">Employees</div></div>
+            <div class="detail-kpi"><div class="detail-kpi-val">12</div><div class="detail-kpi-label">Countries</div></div>
+            <div class="detail-kpi"><div class="detail-kpi-val">98%</div><div class="detail-kpi-label">Retention Rate</div></div>
+          </div>
+        </div>
+
+        <!-- Info rows -->
+        <div>
+          <div class="detail-section-title">Company Info</div>
+          <div class="detail-info-rows">
+            <div class="detail-info-row">
+              <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>San Francisco, CA · <strong>Remote-friendly</strong></span>
+            </div>
+            <div class="detail-info-row">
+              <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              <span>Industry: <strong>Enterprise SaaS / B2B Software</strong></span>
+            </div>
+            <div class="detail-info-row">
+              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>Stage: <strong>Series B · $68M raised</strong></span>
+            </div>
+            <div class="detail-info-row">
+              <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <span>Growth: <strong>↑ 82% YoY</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compatibility -->
+        <div>
+          <div class="detail-section-title">Compatibility Breakdown</div>
+          <div class="compat-bars">
+            <div class="compat-bar-item">
+              <div class="compat-bar-labels"><span class="compat-bar-name">Business Model Fit</span><span class="compat-bar-pct">99%</span></div>
+              <div class="compat-track"><div class="compat-fill" style="width:99%"></div></div>
+            </div>
+            <div class="compat-bar-item">
+              <div class="compat-bar-labels"><span class="compat-bar-name">Market Alignment</span><span class="compat-bar-pct">96%</span></div>
+              <div class="compat-track"><div class="compat-fill" style="width:96%"></div></div>
+            </div>
+            <div class="compat-bar-item">
+              <div class="compat-bar-labels"><span class="compat-bar-name">Stage & Scale Match</span><span class="compat-bar-pct">94%</span></div>
+              <div class="compat-track"><div class="compat-fill" style="width:94%"></div></div>
+            </div>
+            <div class="compat-bar-item">
+              <div class="compat-bar-labels"><span class="compat-bar-name">Geographic Overlap</span><span class="compat-bar-pct">88%</span></div>
+              <div class="compat-track"><div class="compat-fill" style="width:88%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Also viewed by -->
+        <div>
+          <div class="detail-section-title">Also Matched With</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="avatar-stack">
+              <div class="av-small" style="background:linear-gradient(135deg,#14B8A6,#06B6D4)">NV</div>
+              <div class="av-small" style="background:linear-gradient(135deg,#1A5FAA,#2E7FD9)">CG</div>
+              <div class="av-small" style="background:linear-gradient(135deg,#06B6D4,#14B8A6)">MF</div>
+              <div class="av-small av-more">+4</div>
+            </div>
+            <span class="av-count-label">7 companies also matched</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="action-btns">
+          <button class="btn-detail-primary">⚡ Connect with Apex Technologies</button>
+          <button class="btn-detail-ghost">Schedule Intro Call</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+function selectCard(card, id) {
+  document.querySelectorAll('.match-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  // Ripple
+  const rect = card.getBoundingClientRect();
+  const r = document.createElement('span');
+  r.style.cssText=`position:absolute;border-radius:50%;background:rgba(0,212,255,0.18);transform:scale(0);animation:ripple 400ms ease-out forwards;pointer-events:none;width:60px;height:60px;left:50%;top:50%;margin:-30px;`;
+  card.appendChild(r); r.addEventListener('animationend',()=>r.remove());
+}
+
+// Filter chips
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Ripple on connect buttons
+document.querySelectorAll('.connect-btn,.btn-detail-primary,.btn-detail-ghost').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    const rect = this.getBoundingClientRect();
+    const r = document.createElement('span');
+    r.style.cssText=`position:absolute;border-radius:50%;background:rgba(6,182,212,0.25);transform:scale(0);animation:ripple 500ms ease-out forwards;pointer-events:none;width:80px;height:80px;left:${e.clientX-rect.left-40}px;top:${e.clientY-rect.top-40}px;`;
+    this.style.position='relative'; this.style.overflow='hidden';
+    this.appendChild(r); r.addEventListener('animationend',()=>r.remove());
+  });
+});
+
+const s = document.createElement('style');
+s.textContent = '@keyframes ripple{to{transform:scale(5);opacity:0}}';
+document.head.appendChild(s);
+</script>
+</body>
+</html>

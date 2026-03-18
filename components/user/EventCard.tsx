@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Calendar, MapPin, ArrowRight } from "lucide-react";
+import { Calendar, MapPin, ArrowRight, Package, BookOpen } from "lucide-react";
 
 interface EventData {
   id: string;
@@ -7,6 +7,7 @@ interface EventData {
   venue_name?: string | null;
   event_start_date?: string | null;
   event_end_date?: string | null;
+  thumbnail_url?: string | null;
   isActive: boolean;
   role_in_event: "buyer" | "seller";
 }
@@ -29,10 +30,18 @@ export default function EventCard({ event }: { event: EventData }) {
 
   return (
     <div
-      className={`rounded-2xl border bg-white p-5 flex flex-col gap-4 shadow-xs hover:shadow-md transition-shadow ${
+      className={`rounded-2xl border bg-white flex flex-col shadow-xs hover:shadow-md transition-shadow overflow-hidden ${
         event.isActive ? "border-calm-blue/30" : "border-light-border"
       }`}
     >
+      {/* Thumbnail */}
+      {event.thumbnail_url && (
+        <div className="h-32 w-full overflow-hidden bg-pale-blue-tint">
+          <img src={event.thumbnail_url} alt={event.name} className="w-full h-full object-cover" />
+        </div>
+      )}
+
+      <div className="p-5 flex flex-col gap-4">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-display font-semibold text-heading-4 text-ink-gray leading-snug">
@@ -94,6 +103,23 @@ export default function EventCard({ event }: { event: EventData }) {
         >
           My Schedule
         </Link>
+        <Link
+          href={`/profile/products/${event.id}`}
+          className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-light-border text-ink-gray text-body-sm font-medium hover:bg-pale-blue-tint transition-colors"
+          title="Select products for this event"
+        >
+          <Package size={12} />
+          Products
+        </Link>
+        <Link
+          href={`/profile/catalogues/${event.id}`}
+          className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-light-border text-ink-gray text-body-sm font-medium hover:bg-pale-blue-tint transition-colors"
+          title="Select catalogues for this event"
+        >
+          <BookOpen size={12} />
+          Catalogues
+        </Link>
+      </div>
       </div>
     </div>
   );

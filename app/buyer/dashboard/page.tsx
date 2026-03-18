@@ -10,6 +10,7 @@ interface EventData {
   venue_name?: string | null;
   event_start_date?: string | null;
   event_end_date?: string | null;
+  thumbnail_url?: string | null;
   isActive: boolean;
   role_in_event: "buyer" | "seller";
 }

@@ -1,6 +1,6 @@
 # PDS Business Matching System — Project Plan
 
-**Version:** 1.8
+**Version:** 2.0
 **Date:** March 18, 2026
 **Author:** Fadhil
 
@@ -59,6 +59,7 @@ The public-facing entry point is a **landing page** at the root URL (`/`) that i
 #### Event Management
 - Create an event with:
   - Event name, description
+  - **Event thumbnail image** — uploaded by admin, displayed on event cards in user dashboards to make events more visually appealing
   - Physical event date range (e.g., March 10–11 — the actual in-person days)
   - **Matchup window**: separate open/close dates for when users can browse and request matches online (e.g., opens March 3, closes March 11)
   - Venue name and location (set by admin, shown to matched users)
@@ -175,7 +176,7 @@ Managed from `/admin/settings`. All values serve as platform-wide defaults; even
   - **"Request Match"** button — inline on the card
     - Shows as "Requested" (disabled) if already sent
     - Disabled entirely if Buyer has reached the event's max match cap
-  - **"View Profile"** button — opens a **right-side drawer** with complete profile details (full bio, website URL, all tags, logo) and a Request Match button inside the drawer that **mirrors the card state exactly** (same "Requested" label and disabled states)
+  - **"View Profile"** button — opens a **large centered modal (~70% screen width)** with full profile details: logo, company name, industry, tags, full bio, website URL, highlighted products (with thumbnails), and PDF catalogues. Request Match button at the bottom mirrors the card state exactly
 - Cards are displayed in a responsive grid (3-col desktop, 2-col tablet, 1-col mobile)
 - **Notification badge** on dashboard/matches tab when a match status changes (confirmed, scheduled, declined)
 - **Matches page** displays match statuses as **card-style entries** with two tabs:
@@ -213,7 +214,7 @@ Managed from `/admin/settings`. All values serve as platform-wide defaults; even
 - Cards are filtered to show only Buyers whose **industry or tags overlap** with the Procurer's own profile
   - Falls back to showing **all Buyers** in the event if no overlapping matches exist
 - Same search bar + filter panel available
-- **"View Profile"** button opens a **right-side drawer** with full profile details
+- **"View Profile"** button opens a **large centered modal** with full profile details (same layout as Buyer's view — includes highlighted products and catalogues)
 - **"Ready to Match" inbox** — list of Buyers who have requested to match with them
   - Declined requests are **hidden** from the active inbox (not shown to reduce clutter); accessible only in a separate history/log view
 - For each pending request: **Confirm** or **Decline**
@@ -392,6 +393,7 @@ The landing page is the **public face** of the PDS Connect platform. It is acces
 | description | text | |
 | venue_name | text | |
 | venue_address | text | |
+| thumbnail_url | text | Supabase Storage URL — event card image uploaded by admin |
 | event_start_date | date | Physical event start (in-person days) |
 | event_end_date | date | Physical event end |
 | matchup_open_date | date | When users can start browsing + requesting matches |
@@ -479,6 +481,52 @@ Tracks the back-and-forth time slot proposals between Buyer and Procurer after i
 | extended_by | uuid (FK → users) | Nullable — admin who applied the extension |
 | created_at | timestamp | |
 
+### `products`
+Global product library per seller. Products can be reused across events.
+
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid (PK) | |
+| user_id | uuid (FK → users) | Seller who owns this product |
+| name | text | Product name |
+| description | text | Nullable |
+| thumbnail_url | text | Supabase Storage URL |
+| created_at | timestamp | |
+
+### `event_products`
+Per-event product highlights — which products a seller is showcasing at a specific event.
+
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid (PK) | |
+| event_id | uuid (FK → events) | |
+| user_id | uuid (FK → users) | Seller |
+| product_id | uuid (FK → products) | |
+| display_order | integer | For ordering within the modal |
+| UNIQUE | (event_id, product_id) | No duplicate highlights |
+
+### `catalogues`
+Global PDF catalogue library per seller.
+
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid (PK) | |
+| user_id | uuid (FK → users) | Seller who owns this catalogue |
+| name | text | Display name (e.g. "2026 Product Catalogue") |
+| file_url | text | Supabase Storage URL (PDF) |
+| created_at | timestamp | |
+
+### `event_catalogues`
+Per-event catalogue selection — which PDFs a seller attaches to a specific event.
+
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid (PK) | |
+| event_id | uuid (FK → events) | |
+| user_id | uuid (FK → users) | Seller |
+| catalogue_id | uuid (FK → catalogues) | |
+| UNIQUE | (event_id, catalogue_id) | No duplicate attachments |
+
 ### `system_settings`
 Stores platform-wide global configuration. Single-row table (one record for the whole platform).
 
@@ -526,6 +574,7 @@ Stores platform-wide global configuration. Single-row table (one record for the 
 | `/admin/events/[id]/participants` | View/manage event participants |
 | `/admin/events/[id]/matches` | View all matches for event |
 | `/admin/events/[id]/itinerary` | Master event itinerary — all confirmed meetings by day/slot (read + reassign) |
+| `/admin/events/[id]/calendar` | Calendar view — confirmed meetings in day/time grid, filterable by buyer/seller |
 | `/admin/users` | Global user database |
 | `/admin/users/upload` | Excel upload page |
 | `/admin/users/[id]` | Edit individual user (incl. industry, tags, send welcome email) |
@@ -543,6 +592,8 @@ Stores platform-wide global configuration. Single-row table (one record for the 
 | `/buyer/events/[id]/matches` | Match cards — "In Progress" and "Completed" tabs |
 | `/buyer/events/[id]/schedule` | My Schedule — daily itinerary of confirmed meetings |
 | `/profile` | Edit profile (bio, logo, website URL) + change password |
+| `/profile/products` | Manage global product library (add, edit, delete) |
+| `/profile/catalogues` | Manage global PDF catalogue library |
 
 ### Procurer Dashboard (`/procurer/*`)
 | Route | Page |
@@ -553,6 +604,10 @@ Stores platform-wide global configuration. Single-row table (one record for the 
 | `/procurer/events/[id]/matches` | Match cards — "In Progress" and "Completed" tabs |
 | `/procurer/events/[id]/schedule` | My Schedule — daily itinerary of confirmed meetings |
 | `/profile` | Edit profile (bio, logo, website URL) + change password |
+| `/profile/products` | Manage global product library (add, edit, delete) |
+| `/profile/catalogues` | Manage global PDF catalogue library |
+| `/procurer/events/[id]/products` | Select which products to highlight for this event |
+| `/procurer/events/[id]/catalogues` | Select which catalogues to attach to this event |
 
 ---
 
@@ -597,81 +652,109 @@ Stores platform-wide global configuration. Single-row table (one record for the 
 
 ## 11. Phased Development Roadmap
 
-### Phase 0 — Landing Page
-- [ ] Design branding (colours, typography, logo) — *pending*
-- [ ] Build PDS Connect landing page (`/`)
-- [ ] Build "Interested to Join?" form with Supabase + Resend integration
-- [ ] Create `enquiries` table + admin enquiries view
+### Phase 0 — Landing Page ✅ Complete
+- [x] Design branding (colours, typography, logo)
+- [x] Build PDS Connect landing page (`/`)
+- [x] Build "Interested to Join?" form with Supabase + Resend integration
+- [x] Create `enquiries` table + admin enquiries view
 
-### Phase 1 — Foundation
-- [ ] Set up Next.js + Supabase project
-- [ ] Configure Supabase Auth (admin + end-user login flows)
-- [ ] Build database schema + RLS policies
-- [ ] Admin login + Super Admin seeding script
+### Phase 1 — Foundation ✅ Complete
+- [x] Set up Next.js + Supabase project
+- [x] Configure Supabase Auth (admin + end-user login flows)
+- [x] Build database schema + RLS policies
+- [x] Admin login + Super Admin seeding script
 
-### Phase 2 — Admin Core
-- [ ] Global industries master list + management page (`/admin/settings/industries`)
-- [ ] Event creation (with matchup window, time slots, venue, match caps)
-- [ ] Excel upload + upsert user logic (create Supabase Auth accounts for new users)
-- [ ] Welcome email + password-reset flow (Resend integration)
-- [ ] "Assigned to new event" notification email
-- [ ] Enquiry approval flow: Create Account (inactive) → Send Welcome Email manually
-- [ ] Admin password reset for any user
+### Phase 2 — Admin Core ✅ Complete
+- [x] Global industries master list + management page (`/admin/settings/industries`)
+- [x] Event creation (with matchup window, time slots, venue, match caps)
+- [x] Excel upload + upsert user logic (create Supabase Auth accounts for new users)
+- [x] Welcome email + password-reset flow (Resend integration)
+- [x] "Assigned to new event" notification email
+- [x] Enquiry approval flow: Create Account (inactive) → Send Welcome Email manually
+- [x] Admin password reset for any user
 
-### Phase 2b — AI Assignment
-- [ ] Gemini API integration
-- [ ] Website content fetcher (reads live website URL per user as context input)
-- [ ] Per-event AI run: generate summary + relevance score per user (fresh each run)
-- [ ] `ai_assignment_results` table to persist run output between admin sessions
-- [ ] AI-assisted event assignment page (`/admin/events/[id]/assign`)
-  - Two tabs: "Confirmed Matches" (≥70%) and "Might Be Related" (<70%)
-  - Colour-coded score badges (green / orange / red)
-  - Sortable by relevance score
-  - Tick all / deselect / manually dismiss / move between tabs
-  - Manual user search to add anyone not surfaced by AI
-  - "Add Selected to Event" button
+### Phase 2b — AI Assignment ✅ Complete
+- [x] Gemini API integration
+- [x] Website content fetcher (reads live website URL per user as context input)
+- [x] Per-event AI run: generate summary + relevance score per user (fresh each run)
+- [x] `ai_assignment_results` table to persist run output between admin sessions
+- [x] AI-assisted event assignment page (`/admin/events/[id]/assign`)
 
-### Phase 3 — End User Dashboards
-- [ ] Login → dashboard with Active / Archived event switcher
-- [ ] Card grid browse page (responsive: 3-col → 2-col → 1-col)
-  - Industry/tag-matched counterparts; falls back to all if no matches
-  - Search bar + industry dropdown + tag multi-select filters
-  - Inline Request Match button + View Profile side drawer
-  - Drawer button mirrors card state exactly
-- [ ] Buyer: cancel pending request; Accept / Reject / Suggest New Time on confirmed matches
-- [ ] Time negotiation loop: Suggest New Time → Procurer Accept or Counter-propose (unlimited rounds)
-- [ ] Negotiation timer: 24hr reminder email + 48hr auto-cancel (both parties notified); timer resets on each new suggestion
-- [ ] Card-style Matches page with "In Progress" and "Completed" tabs
-  - Status badges: `Pending`, `Awaiting Buyer`, `Negotiating`, `Scheduled`, `Declined`, `Cancelled`
-  - Countdown timer visible on `Negotiating` cards
-- [ ] My Schedule page per event — daily itinerary grouped by event day (time | company | table)
-- [ ] PDF export of My Schedule (print-ready itinerary)
-- [ ] Allow fresh re-request immediately after auto-cancel (no cooldown)
-- [ ] Procurer: Ready to Match inbox (declined hidden), confirm/decline, select time slot
-- [ ] Notification badges (auto-clear on visit to matches page)
-- [ ] Profile edit page (bio, logo, website URL — global; industry/tags read-only)
-- [ ] Change password from profile page + forgot password on login
-- [ ] Full email notification suite for all match + negotiation events
+### Phase 3 — End User Dashboards ✅ Complete
+- [x] Login → dashboard with Active / Archived event switcher
+- [x] Card grid browse page with search, filters, inline Request Match, View Profile modal
+- [x] Buyer: cancel pending request; Accept / Reject / Suggest New Time on confirmed matches
+- [x] Time negotiation loop with 24hr reminder + 48hr auto-cancel
+- [x] Card-style Matches page with "In Progress" and "Completed" tabs
+- [x] My Schedule page per event with PDF export
+- [x] Procurer: Ready to Match inbox, confirm/decline, select time slot
+- [x] Notification badges, profile edit, change password, forgot password
+- [x] Full email notification suite
 
-### Phase 4 — Admin Oversight
-- [ ] Admin dashboard overview with live stats widgets (active matches, scheduled, stalled count)
-- [ ] Sidebar live badge on "Matches" nav item (stalled negotiation count)
-- [ ] Match monitoring per event (all statuses, ⚠️ flag on stalled rows)
-- [ ] Admin email + dashboard flag for 24hr-stalled negotiations
-- [ ] Manual timer extension from admin panel (choose +12hr / +24hr / +48hr)
-- [ ] Auto-cancel job (48hr) with `cancel_reason` logging
-- [ ] Admin event-wide itinerary page (`/admin/events/[id]/itinerary`) — master schedule with cancel/reassign
-- [ ] System Settings page (`/admin/settings`) — Super Admin only
-  - Configurable: negotiation thresholds, default match caps, default matchup window, notification emails
-- [ ] Staff vs Admin permission enforcement
-- [ ] Re-send welcome email, manual match intervention, admin password reset
+### Phase 4 — Admin Oversight ✅ Complete
+- [x] Admin dashboard with live stats widgets + sidebar stalled badge
+- [x] Match monitoring per event with ⚠️ stalled flags
+- [x] Manual timer extension, auto-cancel job, System Settings page
+- [x] Admin event-wide itinerary page
+- [x] Staff vs Admin permission enforcement
+- [x] Re-send welcome email, manual match intervention, admin password reset
 
-### Phase 5 — Polish & Deploy
-- [ ] Reporting + export (Excel/CSV)
-- [ ] UI polish (loading states, empty states, mobile-responsive)
-- [ ] PDF generation library integration (for My Schedule export)
-- [ ] Vercel deployment + environment variable setup
-- [ ] End-to-end testing
+### Phase 5 — Polish & Deploy ✅ Complete
+- [x] Reporting + export (Excel/CSV)
+- [x] UI polish, mobile-responsive
+- [x] PDF generation (My Schedule export)
+- [x] Vercel deployment
+- [x] End-to-end testing
+
+---
+
+### Phase 6 — New Features (Current)
+
+#### 6.1 — Seller Product Showcase
+- [ ] Global product library per seller (`/profile/products`)
+  - Add product: name, description, thumbnail image
+  - Edit and delete products
+  - Products stored in Supabase Storage (images)
+- [ ] Per-event product selection — seller chooses which products to highlight for each event
+  - From event dashboard: "Manage My Products for This Event"
+  - Tick/untick from their global library
+- [ ] Products visible in the company profile modal (buyer-facing)
+  - Shown as thumbnail grid with product name below each image
+  - Click thumbnail → expands to full product detail view within the modal
+
+#### 6.2 — PDF Product Catalogues
+- [ ] Global catalogue library per seller — upload one or more PDFs to their profile
+- [ ] Per-event catalogue selection — seller chooses which catalogues to attach to each event
+- [ ] Catalogues visible in the company profile modal (buyer-facing)
+  - Listed as downloadable/viewable PDF links (📄 icon + filename)
+  - Opens in-browser PDF viewer or downloads on click
+- [ ] Admin can view a seller's catalogues from the user management page
+
+#### 6.3 — Admin Calendar View
+- [ ] Calendar view for admin at `/admin/events/[id]/calendar`
+  - Shows all confirmed meetings in a day/time grid
+  - Each meeting block shows: time slot, buyer name, seller name
+  - Filter by seller (Procurer) — shows only their meetings on the calendar
+  - Filter by buyer — shows only their meetings
+- [ ] Clicking a meeting block opens a **quick popup** with:
+  - Buyer company, Procurer company, time, venue/table
+  - Quick actions: **Cancel** or **Reassign** (opens time slot picker)
+
+#### 6.4 — Profile View → Centered Modal
+- [ ] Replace right-side drawer with a **large centered modal (~70% screen width)**
+- [ ] Modal sections (scrollable):
+  1. Header: company logo, name, industry badge, website link
+  2. Tags section
+  3. Full bio
+  4. Highlighted Products (thumbnail grid — event-specific selection)
+  5. PDF Catalogues (downloadable links)
+  6. Request Match button (pinned to bottom or footer of modal)
+
+#### 6.5 — Event Thumbnail
+- [ ] Admin can upload a **thumbnail image** when creating or editing an event
+- [ ] Thumbnail displayed on event cards in user dashboards (Active & Archived event switcher)
+- [ ] Makes the event list visually appealing and helps users quickly identify events
+- [ ] Stored in Supabase Storage; `thumbnail_url` column added to `events` table
 
 ---
 
@@ -692,10 +775,10 @@ Stores platform-wide global configuration. Single-row table (one record for the 
 | 11 | Enquiry-to-account waitlist flow? | ✅ Enquiry approved → account created as inactive (no email sent) → admin has intro meeting → admin manually sends welcome email when ready → user sets password and gains access. |
 | 12 | AI Summary regeneration trigger? | ✅ Fresh per event assignment run only. Not auto-triggered by profile changes. |
 | 13 | "Might Be Related" tab — unticked users persist? | ✅ Stay unless manually dismissed. Admin can also search the full user list to add anyone not surfaced by AI. |
-| 14 | Browse/Discover UI layout? | ✅ Card grid (3-col desktop, 2-col tablet, 1-col mobile). Each card: logo, company name, industry badge, tag chips, bio snippet. Inline "Request Match" button (shows "Requested" if already sent, disabled at cap). "View Profile" opens a right-side drawer with full profile + Request Match button. |
+| 14 | Browse/Discover UI layout? | ✅ Card grid (3-col desktop, 2-col tablet, 1-col mobile). Each card: logo, company name, industry badge, tag chips, bio snippet. Inline "Request Match" button (shows "Requested" if already sent, disabled at cap). "View Profile" opens a **large centered modal** (~70% width) with full profile + Request Match button. *(Updated by Decision #39)* |
 | 16 | Who do users see on the Discover page? | ✅ Only counterparts whose industry or tags overlap with their own profile. Not all event participants. |
 | 17 | Discover page search & filters? | ✅ Search bar (by company name) + industry dropdown + tag multi-select chips. |
-| 18 | Profile view style? | ✅ Right-side drawer that slides in without leaving the card grid. Request Match button mirrors the card state exactly (same "Requested" label, same disabled states). |
+| 18 | Profile view style? | ✅ **Large centered modal** (~70% screen width) — replaces the original side drawer. Sections: logo/name, industry badge, tags, bio, highlighted products (thumbnail grid), PDF catalogues, Request Match button. *(Updated by Decision #39)* |
 | 15 | AI reads website content? | ✅ Yes — Gemini fetches live website URL per user as additional context for summaries and scores. Fails gracefully if site is inaccessible. |
 | 19 | No industry/tag matches on Discover page? | ✅ Falls back to showing all counterparts in the event — no empty screen. |
 | 20 | Matches page layout? | ✅ Card-style entries with status badges. Statuses: Pending, Awaiting Buyer, Negotiating, Scheduled, Declined, Cancelled. |
@@ -715,14 +798,24 @@ Stores platform-wide global configuration. Single-row table (one record for the 
 | 34 | Re-request cooldown after auto-cancel? | ✅ No cooldown — Buyer can re-request immediately. |
 | 35 | System Settings contents? | ✅ Negotiation reminder threshold, auto-cancel threshold, default match caps (buyer/procurer), default matchup window length, admin notification email recipients. All values are platform-wide defaults; event-level settings take precedence. |
 
+| 36 | Product scope | ✅ Global product library per seller + per-event selection of which to highlight. |
+| 37 | Catalogue scope | ✅ Global library per seller + per-event selection of which PDFs to attach to each event. |
+| 38 | Admin calendar click behaviour | ✅ Quick popup with Buyer, Procurer, time, table + Cancel and Reassign actions. |
+| 39 | Profile view style | ✅ Large centered modal (~70% screen width) replacing the side drawer. Sections: logo/name, tags, bio, highlighted products, catalogues, Request Match button. |
+| 40 | Event thumbnail | ✅ Admin uploads a thumbnail image per event. Shown on event cards in user dashboards. |
+| 41 | PDF itinerary — company logos? | ✅ Yes — counterpart's company logo is included in the PDF itinerary alongside name, time, and table details. |
+| 42 | Reassign meeting — who is notified? | ✅ Both parties (Buyer and Procurer) are automatically notified by email when admin reassigns a meeting. |
+| 43 | Admin notification email scope | ✅ Critical alerts only — stalled negotiations and new enquiries. No daily digest. |
+| 44 | Audit trail for System Settings changes | ✅ Yes — all System Settings changes are logged (who changed what, when). |
+| 45 | Catalogue view behaviour | ✅ Opens in browser new tab (inline PDF viewer). Not a forced download. |
+| 46 | Product highlight cap per event | ✅ Unlimited by default. Admin can optionally set a maximum number of highlighted products per seller during event setup. |
+| 47 | Calendar view placement | ✅ Sits alongside the existing itinerary table view as a togglable tab (not a replacement). Admin can switch between Table view and Calendar view. |
+
 ---
 
 ## 13. Open Questions / To Decide Later
 
-- Should the **PDF itinerary** include the counterpart's company logo, or just text (name, time, table)?
-- When admin **reassigns a meeting** from the event itinerary page, should both parties be notified by email automatically, or is it admin's discretion?
-- Should the **admin notification emails** (in System Settings) also receive a daily digest of match activity, or only critical alerts (stalled, new enquiry)?
-- Should **System Settings changes** be logged in an audit trail (who changed what, when)?
+_All current questions resolved. See Section 12 (Resolved Decisions #41–47)._
 
 ---
 

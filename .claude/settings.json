@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find 'c:/Users/User/Desktop/Claude Projects/PDS Business Matching/app/buyer' -type f -name *.tsx -o -name *.ts)",
+      "Bash(find 'c:/Users/User/Desktop/Claude Projects/PDS Business Matching/app/seller' -type f -name *.tsx -o -name *.ts)",
+      "Bash(find 'c:/Users/User/Desktop/Claude Projects/PDS Business Matching/components/user' -type f -name *.tsx -o -name *.ts)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\User\\Desktop\\Claude Projects\\PDS Business Matching\\app\\api\\events\\[id]\\showcase",
+      "c:\\Users\\User\\Desktop\\Claude Projects\\PDS Business Matching\\app\\admin\\events\\[id]"
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import ProfileDrawer from "@/components/user/ProfileDrawer";
+import ProfileModal from "@/components/user/ProfileModal";
 import { Search, SlidersHorizontal, Building2, Tag, X } from "lucide-react";
 
 interface Counterpart {
@@ -187,11 +187,10 @@ export default function SellerDiscoverPage({ params }: Props) {
       )}
 
       {drawerProfile && (
-        <ProfileDrawer
+        <ProfileModal
           profile={drawerProfile}
+          eventId={eventId}
           onClose={() => setDrawerProfile(null)}
-          onRequestMatch={() => {}}
-          matchCapReached={false}
         />
       )}
     </div>

@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDS Connect — Dashboard Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #2E7FD9; --sky: #5BABF0; --deep: #1A5FAA;
+    --cyan: #06B6D4; --ecyan: #00D4FF; --teal: #14B8A6; --dteal: #0D9488;
+    --cyanT: #ECFEFF; --paleT: #EEF5FC; --border: #D8E6F5;
+    --ink: #3A3A3A; --mid: #8A8A8A; --carbon: #0D0D0D; --white: #FFFFFF;
+    --bg: #EBF9FC; --grad: linear-gradient(135deg, #2E7FD9 0%, #06B6D4 55%, #14B8A6 100%);
+    --sidebar: #06101E;
+  }
+  body {
+    font-family: 'Inter', sans-serif; background: var(--bg);
+    display: flex; height: 100vh; overflow: hidden; color: var(--carbon);
+  }
+
+  /* ---- SIDEBAR ---- */
+  .sidebar {
+    width: 72px; height: 100vh; flex-shrink: 0;
+    background: var(--sidebar); border-right: 1px solid rgba(0,212,255,0.10);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 16px 0; gap: 4px; position: relative; z-index: 10;
+    transition: width 0.22s ease;
+  }
+  .sidebar:hover { width: 220px; }
+  .sidebar-logo {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: var(--grad); display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px; flex-shrink: 0; box-shadow: 0 0 16px rgba(6,182,212,0.35);
+  }
+  .sidebar-logo svg { width: 22px; height: 22px; stroke: white; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  .nav-section { width: 100%; padding: 0 12px; }
+  .nav-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.25); text-transform: uppercase;
+    padding: 12px 4px 6px; white-space: nowrap; overflow: hidden;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .sidebar:hover .nav-label { opacity: 1; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    height: 44px; border-radius: 10px; padding: 0 11px;
+    cursor: pointer; transition: all 0.12s cubic-bezier(0.4,0,0.2,1);
+    white-space: nowrap; overflow: hidden; position: relative;
+    color: rgba(255,255,255,0.45);
+  }
+  .nav-item:hover { background: rgba(0,212,255,0.10); color: rgba(255,255,255,0.90); }
+  .nav-item.active {
+    background: rgba(0,212,255,0.12); color: white; font-weight: 600;
+    border-left: 3px solid var(--ecyan);
+  }
+  .nav-item.active .nav-icon { color: var(--ecyan); }
+  .nav-icon { width: 20px; height: 20px; flex-shrink: 0; }
+  .nav-icon svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .nav-text { font-size: 13px; font-weight: 500; opacity: 0; transition: opacity 0.12s; white-space: nowrap; }
+  .sidebar:hover .nav-text { opacity: 1; }
+
+  /* ---- MAIN ---- */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* ---- TOPBAR ---- */
+  .topbar {
+    height: 64px; flex-shrink: 0;
+    background: rgba(255,255,255,0.88); backdrop-filter: blur(20px) saturate(1.6);
+    border-bottom: 1px solid rgba(6,182,212,0.12);
+    display: flex; align-items: center; padding: 0 32px; gap: 20px;
+  }
+  .breadcrumb { flex: 1; }
+  .breadcrumb-parent { font-size: 12px; color: var(--mid); }
+  .breadcrumb-current { font-size: 18px; font-weight: 700; color: var(--carbon); font-family: 'Sora',sans-serif; }
+  .search-bar {
+    display: flex; align-items: center; gap: 10px;
+    height: 38px; padding: 0 14px; border-radius: 10px;
+    border: 1.5px solid var(--border); background: white; width: 260px;
+    transition: all 0.15s ease;
+  }
+  .search-bar:focus-within { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(6,182,212,0.15); }
+  .search-bar svg { width: 16px; height: 16px; stroke: var(--mid); fill: none; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
+  .search-bar input { border: none; outline: none; font-size: 13px; color: var(--ink); background: transparent; width: 100%; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .icon-btn {
+    width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    background: var(--paleT); border: 1px solid var(--border); cursor: pointer; position: relative;
+    transition: all 0.15s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .icon-btn:hover { background: var(--cyanT); border-color: var(--cyan); transform: scale(1.1); box-shadow: 0 0 12px rgba(6,182,212,0.25); }
+  .icon-btn svg { width: 18px; height: 18px; stroke: var(--blue); fill: none; stroke-width: 1.8; stroke-linecap: round; }
+  .notif-dot {
+    position: absolute; top: 6px; right: 6px; width: 8px; height: 8px;
+    border-radius: 50%; background: var(--ecyan); border: 2px solid white;
+    box-shadow: 0 0 6px rgba(0,212,255,0.6);
+    animation: badgePop 0.3s cubic-bezier(0.68,-0.55,0.27,1.55) both;
+  }
+  @keyframes badgePop { from { transform: scale(0); } to { transform: scale(1); } }
+  .avatar-btn {
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+    padding: 4px 8px; border-radius: 10px; transition: background 0.15s;
+  }
+  .avatar-btn:hover { background: var(--cyanT); }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--grad); border: 2px solid transparent; background-clip: padding-box; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 13px; }
+  .avatar-ring { width: 38px; height: 38px; border-radius: 50%; background: var(--grad); padding: 2px; display: flex; align-items: center; justify-content: center; }
+  .avatar-inner { width: 100%; height: 100%; border-radius: 50%; background: #1A5FAA; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 13px; }
+  .avatar-name { font-size: 13px; font-weight: 600; color: var(--carbon); }
+
+  /* ---- CONTENT ---- */
+  .content { flex: 1; overflow-y: auto; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; }
+
+  /* KPI CARDS */
+  .kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+  .kpi-card {
+    background: white; border-radius: 16px; padding: 20px 22px;
+    border: 1px solid var(--border); cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .kpi-card:hover { transform: translateY(-5px) scale(1.01); box-shadow: 0 12px 36px rgba(6,182,212,0.18); border-color: var(--cyan); }
+  .kpi-card.accent { background: var(--grad); border-color: transparent; box-shadow: 0 8px 28px rgba(6,182,212,0.35); }
+  .kpi-card.accent:hover { box-shadow: 0 16px 44px rgba(6,182,212,0.50); }
+  .kpi-top { display: flex; align-items: center; justify-content: space-between; }
+  .kpi-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg,rgba(46,127,217,0.15),rgba(6,182,212,0.15)); }
+  .kpi-icon svg { width: 18px; height: 18px; stroke: var(--cyan); fill: none; stroke-width: 2; stroke-linecap: round; }
+  .kpi-card.accent .kpi-icon { background: rgba(255,255,255,0.2); }
+  .kpi-card.accent .kpi-icon svg { stroke: white; }
+  .kpi-delta { font-size: 11px; font-weight: 600; color: var(--teal); background: rgba(20,184,166,0.10); padding: 3px 8px; border-radius: 99px; }
+  .kpi-card.accent .kpi-delta { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.18); }
+  .kpi-val { font-family: 'Sora',sans-serif; font-size: 34px; font-weight: 800; color: var(--carbon); line-height: 1; }
+  .kpi-card.accent .kpi-val { color: white; }
+  .kpi-label { font-size: 12px; color: var(--mid); font-weight: 500; }
+  .kpi-card.accent .kpi-label { color: rgba(255,255,255,0.65); }
+
+  /* BENTO GRID */
+  .bento { display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: auto; gap: 16px; }
+  .card {
+    background: white; border-radius: 18px; border: 1px solid var(--border);
+    transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    overflow: hidden;
+  }
+  .card:hover { box-shadow: 0 8px 32px rgba(6,182,212,0.14); border-color: rgba(6,182,212,0.35); transform: translateY(-3px); }
+  .card-head { padding: 18px 22px 12px; display: flex; align-items: center; justify-content: space-between; }
+  .card-title { font-size: 14px; font-weight: 700; color: var(--carbon); }
+  .card-sub { font-size: 11px; color: var(--mid); margin-top: 2px; }
+  .card-action { font-size: 11px; color: var(--cyan); font-weight: 600; cursor: pointer; padding: 4px 10px; border-radius: 6px; transition: background 0.15s; }
+  .card-action:hover { background: var(--cyanT); }
+
+  /* Chart card */
+  .chart-card { grid-row: span 2; }
+  .chart-body { padding: 0 22px 18px; }
+  .chart-val { font-family: 'Sora',sans-serif; font-size: 40px; font-weight: 800; color: var(--carbon); }
+  .chart-trend { font-size: 12px; color: var(--teal); margin-bottom: 20px; display: flex; align-items: center; gap: 4px; }
+  .area-chart { position: relative; height: 160px; }
+  .area-chart svg { width: 100%; height: 100%; }
+
+  /* Match list */
+  .match-list { display: flex; flex-direction: column; }
+  .match-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 22px; border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: background 0.08s;
+  }
+  .match-item:last-child { border-bottom: none; }
+  .match-item:hover { background: var(--cyanT); }
+  .match-avatar {
+    width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: white;
+  }
+  .match-info { flex: 1; min-width: 0; }
+  .match-name { font-size: 13px; font-weight: 600; color: var(--carbon); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .match-type { font-size: 11px; color: var(--mid); }
+  .match-score {
+    padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700;
+    background: var(--grad); color: white; flex-shrink: 0;
+    box-shadow: 0 0 10px rgba(6,182,212,0.30);
+  }
+
+  /* Activity feed */
+  .activity-list { display: flex; flex-direction: column; }
+  .activity-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 22px; border-bottom: 1px solid var(--border);
+    transition: background 0.08s; cursor: pointer;
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-item:hover { background: var(--cyanT); }
+  .activity-dot-wrap { padding-top: 4px; display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .activity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .ad-cyan { background: var(--ecyan); box-shadow: 0 0 6px rgba(0,212,255,0.5); }
+  .ad-teal { background: var(--teal); }
+  .ad-blue { background: var(--blue); }
+  .ad-gray { background: var(--mid); }
+  .activity-content { flex: 1; }
+  .activity-text { font-size: 12px; color: var(--ink); line-height: 1.5; }
+  .activity-text strong { color: var(--carbon); }
+  .activity-time { font-size: 10px; color: var(--mid); margin-top: 2px; }
+
+  /* Progress card */
+  .progress-body { padding: 0 22px 18px; display: flex; flex-direction: column; gap: 12px; }
+  .progress-item { }
+  .progress-labels { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .progress-name { font-size: 12px; font-weight: 500; color: var(--ink); }
+  .progress-pct { font-size: 12px; font-weight: 600; color: var(--cyan); }
+  .progress-track { height: 6px; border-radius: 99px; background: var(--border); overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; background: var(--grad); transition: width 1s ease-out; }
+
+  /* TABLE */
+  .table-card { grid-column: 1 / -1; }
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th {
+    text-align: left; padding: 10px 22px; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--carbon);
+    background: var(--cyanT); border-bottom: 2px solid var(--cyan);
+  }
+  .data-table td {
+    padding: 13px 22px; font-size: 13px; color: var(--ink);
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table tr { transition: background 0.08s; cursor: pointer; }
+  .data-table tr:hover td { background: #EBF9FC; }
+  .data-table tr:hover td:first-child { border-left: 3px solid var(--cyan); padding-left: 19px; }
+  .status-pill { padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; display: inline-block; }
+  .s-active { background: rgba(20,184,166,0.12); color: var(--teal); }
+  .s-pending { background: rgba(245,158,11,0.12); color: #B45309; }
+  .s-review { background: rgba(46,127,217,0.12); color: var(--blue); }
+  .company-cell { display: flex; align-items: center; gap: 10px; }
+  .company-av { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; color: white; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="12" r="3"/><path d="M9 12h6"/><circle cx="12" cy="8" r="1.5" fill="white" stroke="none"/></svg>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-item active">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div>
+      <span class="nav-text">Dashboard</span>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <span class="nav-text">Matches</span>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+      <span class="nav-text">Messages</span>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+      <span class="nav-text">Analytics</span>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"/><path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/><path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"/><path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"/><path d="M14 14.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"/><path d="M15.5 19H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"/><path d="M10 9.5C10 8.67 9.33 8 8.5 8h-5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z"/><path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2S7 2.67 7 3.5 7.67 5 8.5 5z"/></svg></div>
+      <span class="nav-text">Integrations</span>
+    </div>
+  </div>
+
+  <div style="flex:1"></div>
+
+  <div class="nav-section">
+    <div class="nav-item">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg></div>
+      <span class="nav-text">Profile</span>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+      <span class="nav-text">Settings</span>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="breadcrumb">
+      <div class="breadcrumb-parent">PDS Connect</div>
+      <div class="breadcrumb-current">Dashboard</div>
+    </div>
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search partners, matches...">
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <div class="notif-dot"></div>
+      </div>
+      <div class="icon-btn">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </div>
+      <div class="avatar-btn">
+        <div class="avatar-ring">
+          <div class="avatar-inner">F</div>
+        </div>
+        <span class="avatar-name">Fadhil</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <!-- KPI ROW -->
+    <div class="kpi-row">
+      <div class="kpi-card accent">
+        <div class="kpi-top">
+          <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div class="kpi-delta">↑ +18%</div>
+        </div>
+        <div class="kpi-val" data-target="1284">0</div>
+        <div class="kpi-label">Total Matches</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+          <div class="kpi-delta" style="background:rgba(6,182,212,0.10);color:var(--cyan)">↑ +7</div>
+        </div>
+        <div class="kpi-val" data-target="342" style="color:var(--carbon)">0</div>
+        <div class="kpi-label">Active Partners</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="kpi-delta" style="background:rgba(245,158,11,0.10);color:#B45309">47 open</div>
+        </div>
+        <div class="kpi-val" data-target="47" style="color:var(--carbon)">0</div>
+        <div class="kpi-label">Pending Reviews</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div class="kpi-delta">↑ Record</div>
+        </div>
+        <div class="kpi-val" data-target="94" data-suffix="%" style="color:var(--carbon)">0</div>
+        <div class="kpi-label">Success Rate</div>
+      </div>
+    </div>
+
+    <!-- BENTO -->
+    <div class="bento">
+      <!-- Chart card -->
+      <div class="card chart-card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Match Activity</div>
+            <div class="card-sub">Matches initiated per week</div>
+          </div>
+          <div class="card-action">View all</div>
+        </div>
+        <div class="chart-body">
+          <div class="chart-val" data-target="284">0</div>
+          <div class="chart-trend">↑ 23 more than last month</div>
+          <div class="area-chart">
+            <svg viewBox="0 0 300 120" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#06B6D4" stop-opacity="0.35"/>
+                  <stop offset="100%" stop-color="#06B6D4" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#2E7FD9"/>
+                  <stop offset="50%" stop-color="#06B6D4"/>
+                  <stop offset="100%" stop-color="#14B8A6"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,90 C20,85 40,70 60,72 C80,74 100,50 120,45 C140,40 160,55 180,35 C200,20 220,30 240,25 C260,20 280,15 300,18 L300,120 L0,120 Z" fill="url(#areaGrad)"/>
+              <path d="M0,90 C20,85 40,70 60,72 C80,74 100,50 120,45 C140,40 160,55 180,35 C200,20 220,30 240,25 C260,20 280,15 300,18" fill="none" stroke="url(#lineGrad)" stroke-width="2.5" stroke-linecap="round"/>
+              <!-- Dots -->
+              <circle cx="120" cy="45" r="4" fill="#06B6D4"/><circle cx="120" cy="45" r="2" fill="white"/>
+              <circle cx="300" cy="18" r="5" fill="#14B8A6"/><circle cx="300" cy="18" r="2.5" fill="white"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Matches -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Top Matches</div>
+            <div class="card-sub">By compatibility score</div>
+          </div>
+          <div class="card-action">See all</div>
+        </div>
+        <div class="match-list">
+          <div class="match-item">
+            <div class="match-avatar" style="background:linear-gradient(135deg,#2E7FD9,#06B6D4)">AT</div>
+            <div class="match-info">
+              <div class="match-name">Apex Technologies</div>
+              <div class="match-type">SaaS · Enterprise</div>
+            </div>
+            <div class="match-score">98%</div>
+          </div>
+          <div class="match-item">
+            <div class="match-avatar" style="background:linear-gradient(135deg,#14B8A6,#06B6D4)">NV</div>
+            <div class="match-info">
+              <div class="match-name">NovaBridge Ventures</div>
+              <div class="match-type">FinTech · Growth</div>
+            </div>
+            <div class="match-score">94%</div>
+          </div>
+          <div class="match-item">
+            <div class="match-avatar" style="background:linear-gradient(135deg,#1A5FAA,#2E7FD9)">CG</div>
+            <div class="match-info">
+              <div class="match-name">ClearGrid Energy</div>
+              <div class="match-type">CleanTech · Scale</div>
+            </div>
+            <div class="match-score">91%</div>
+          </div>
+          <div class="match-item">
+            <div class="match-avatar" style="background:linear-gradient(135deg,#06B6D4,#14B8A6)">MF</div>
+            <div class="match-info">
+              <div class="match-name">Meridian Funds</div>
+              <div class="match-type">PE · Investment</div>
+            </div>
+            <div class="match-score">88%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity Feed -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Live Activity</div>
+            <div class="card-sub">Real-time updates</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--teal);font-weight:600">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 6px var(--teal);animation:pulse 2s infinite"></div>
+            Live
+          </div>
+        </div>
+        <div class="activity-list">
+          <div class="activity-item">
+            <div class="activity-dot-wrap"><div class="activity-dot ad-cyan"></div></div>
+            <div class="activity-content">
+              <div class="activity-text"><strong>Apex Technologies</strong> accepted your connection request</div>
+              <div class="activity-time">2 min ago</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot-wrap"><div class="activity-dot ad-teal"></div></div>
+            <div class="activity-content">
+              <div class="activity-text">New match found: <strong>NovaBridge Ventures</strong> · 94% score</div>
+              <div class="activity-time">18 min ago</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot-wrap"><div class="activity-dot ad-blue"></div></div>
+            <div class="activity-content">
+              <div class="activity-text"><strong>ClearGrid Energy</strong> viewed your profile</div>
+              <div class="activity-time">1 hr ago</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot-wrap"><div class="activity-dot ad-gray"></div></div>
+            <div class="activity-content">
+              <div class="activity-text">Partnership with <strong>Vertex Global</strong> marked complete</div>
+              <div class="activity-time">3 hr ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="card" style="grid-column: 1;">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Pipeline Health</div>
+            <div class="card-sub">Stage completion rates</div>
+          </div>
+        </div>
+        <div class="progress-body">
+          <div class="progress-item">
+            <div class="progress-labels"><span class="progress-name">Profile Strength</span><span class="progress-pct">92%</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:92%"></div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-labels"><span class="progress-name">Match Engagement</span><span class="progress-pct">78%</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:78%"></div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-labels"><span class="progress-name">Deal Conversion</span><span class="progress-pct">65%</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:65%"></div></div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-labels"><span class="progress-name">Partner Retention</span><span class="progress-pct">88%</span></div>
+            <div class="progress-track"><div class="progress-fill" style="width:88%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Donut widget -->
+      <div class="card" style="grid-column: 2; display:flex; flex-direction:column;">
+        <div class="card-head">
+          <div>
+            <div class="card-title">By Industry</div>
+            <div class="card-sub">Match distribution</div>
+          </div>
+        </div>
+        <div style="padding:0 22px 18px; display:flex; align-items:center; gap:16px;">
+          <svg width="90" height="90" viewBox="0 0 90 90">
+            <circle cx="45" cy="45" r="35" fill="none" stroke="#D8E6F5" stroke-width="10"/>
+            <circle cx="45" cy="45" r="35" fill="none" stroke="url(#donutGrad)" stroke-width="10" stroke-dasharray="132 88" stroke-dashoffset="33" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="donutGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#2E7FD9"/><stop offset="100%" stop-color="#06B6D4"/>
+              </linearGradient>
+            </defs>
+            <text x="45" y="49" text-anchor="middle" font-size="14" font-weight="800" fill="#0D0D0D" font-family="Sora,sans-serif">60%</text>
+          </svg>
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:11px;">
+            <div style="display:flex;align-items:center;gap:6px"><div style="width:8px;height:8px;border-radius:2px;background:var(--grad)"></div><span style="color:var(--ink)">SaaS / Tech</span></div>
+            <div style="display:flex;align-items:center;gap:6px"><div style="width:8px;height:8px;border-radius:2px;background:var(--teal)"></div><span style="color:var(--ink)">FinTech</span></div>
+            <div style="display:flex;align-items:center;gap:6px"><div style="width:8px;height:8px;border-radius:2px;background:var(--border)"></div><span style="color:var(--ink)">Other</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="card table-card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Partner Pipeline</div>
+          <div class="card-sub">All active and pending partnerships</div>
+        </div>
+        <div class="card-action">Export CSV</div>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Company</th><th>Industry</th><th>Match Score</th><th>Stage</th><th>Status</th><th>Last Activity</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="company-cell"><div class="company-av" style="background:linear-gradient(135deg,#2E7FD9,#06B6D4)">AT</div>Apex Technologies</div></td>
+            <td>SaaS</td><td><span class="match-score" style="font-size:11px">98%</span></td>
+            <td>Negotiation</td><td><span class="status-pill s-active">Active</span></td><td style="color:var(--mid)">2h ago</td>
+          </tr>
+          <tr>
+            <td><div class="company-cell"><div class="company-av" style="background:linear-gradient(135deg,#14B8A6,#06B6D4)">NV</div>NovaBridge Ventures</div></td>
+            <td>FinTech</td><td><span class="match-score" style="font-size:11px">94%</span></td>
+            <td>Intro Call</td><td><span class="status-pill s-pending">Pending</span></td><td style="color:var(--mid)">1d ago</td>
+          </tr>
+          <tr>
+            <td><div class="company-cell"><div class="company-av" style="background:linear-gradient(135deg,#1A5FAA,#2E7FD9)">CG</div>ClearGrid Energy</div></td>
+            <td>CleanTech</td><td><span class="match-score" style="font-size:11px">91%</span></td>
+            <td>Due Diligence</td><td><span class="status-pill s-review">In Review</span></td><td style="color:var(--mid)">3d ago</td>
+          </tr>
+          <tr>
+            <td><div class="company-cell"><div class="company-av" style="background:linear-gradient(135deg,#06B6D4,#14B8A6)">MF</div>Meridian Funds</div></td>
+            <td>PE / Investment</td><td><span class="match-score" style="font-size:11px">88%</span></td>
+            <td>Discovery</td><td><span class="status-pill s-pending">Pending</span></td><td style="color:var(--mid)">5d ago</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<style>
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+</style>
+<script>
+// Counter animation
+function animateNum(el) {
+  const target = parseInt(el.dataset.target);
+  const suffix = el.dataset.suffix || '';
+  let start = performance.now();
+  const dur = 900;
+  function tick(now) {
+    const p = Math.min((now - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(ease * target).toLocaleString() + suffix;
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { animateNum(e.target); obs.unobserve(e.target); } });
+}, { threshold: 0.3 });
+document.querySelectorAll('[data-target]').forEach(el => obs.observe(el));
+
+// Click ripple
+document.querySelectorAll('.kpi-card,.match-item,.activity-item,.data-table tr,.feature-card').forEach(el => {
+  el.addEventListener('click', function(e) {
+    const rect = this.getBoundingClientRect();
+    const r = document.createElement('span');
+    r.style.cssText=`position:absolute;border-radius:50%;background:rgba(6,182,212,0.20);transform:scale(0);animation:ripple 400ms ease-out forwards;pointer-events:none;width:60px;height:60px;left:${e.clientX-rect.left-30}px;top:${e.clientY-rect.top-30}px;`;
+    this.style.position='relative'; this.style.overflow='hidden';
+    this.appendChild(r); r.addEventListener('animationend',()=>r.remove());
+  });
+});
+const s=document.createElement('style');
+s.textContent='@keyframes ripple{to{transform:scale(5);opacity:0}}';
+document.head.appendChild(s);
+</script>
+</body>
+</html>

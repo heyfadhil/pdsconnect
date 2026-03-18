@@ -18,7 +18,7 @@ export async function GET() {
          event_start_date, event_end_date,
          matchup_open_date, matchup_close_date,
          max_matches_per_buyer, max_matches_per_seller,
-         status
+         status, thumbnail_url
        )`
     )
     .eq("user_id", user.id)
@@ -39,6 +39,7 @@ export async function GET() {
     max_matches_per_buyer: number | null;
     max_matches_per_seller: number | null;
     status: string;
+    thumbnail_url: string | null;
   };
 
   const today = new Date().toISOString().split("T")[0];

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { User, LogOut, ChevronDown } from "lucide-react";
+import { User, LogOut, ChevronDown, Package, BookOpen } from "lucide-react";
 
 interface Props {
   userName: string;
@@ -112,6 +112,22 @@ export default function UserNav({ userName, userRole }: Props) {
                 >
                   <User size={13} />
                   Edit Profile
+                </Link>
+                <Link
+                  href="/profile/products"
+                  className="flex items-center gap-2 px-4 py-2 text-body-sm text-ink-gray hover:bg-pale-blue-tint"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <Package size={13} />
+                  My Products
+                </Link>
+                <Link
+                  href="/profile/catalogues"
+                  className="flex items-center gap-2 px-4 py-2 text-body-sm text-ink-gray hover:bg-pale-blue-tint"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <BookOpen size={13} />
+                  My Catalogues
                 </Link>
                 <div className="border-t border-light-border my-1" />
                 <button
