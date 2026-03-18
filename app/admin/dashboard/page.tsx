@@ -118,7 +118,7 @@ export default async function AdminDashboard() {
         <div className="rounded-2xl p-6" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(20px) saturate(1.3)", border: "1px solid rgba(6,182,212,0.15)", boxShadow: "0 2px 16px rgba(6,182,212,0.07), inset 0 1px 0 rgba(255,255,255,0.60)" }}>
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-display text-[17px] font-semibold text-[#0D0D0D]">Recent Events</h2>
-            <Link href="/admin/events" className="text-[13px] font-semibold transition-colors" style={{ color: "#06B6D4" }} onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#0D9488"; }} onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#06B6D4"; }}>View all →</Link>
+            <Link href="/admin/events" className="text-[13px] font-semibold text-[#06B6D4] hover:text-[#0D9488] transition-colors">View all →</Link>
           </div>
           {!recentEvents?.length ? (
             <div className="py-8 text-center">
@@ -131,10 +131,7 @@ export default async function AdminDashboard() {
                 const s = statusStyle[ev.status] ?? { bg: "#F3F4F6", color: "#6B7280" };
                 return (
                   <Link key={ev.id} href={`/admin/events/${ev.id}`}
-                    className="flex items-center justify-between px-3 py-3 rounded-xl transition-all duration-[100ms] group hover:bg-[#ECFEFF]"
-                    style={{ borderLeft: "2px solid transparent" }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = "#06B6D4"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = "transparent"; }}
+                    className="flex items-center justify-between px-3 py-3 rounded-xl transition-all duration-[100ms] group hover:bg-[#ECFEFF] border-l-2 border-l-transparent hover:border-l-[#06B6D4]"
                   >
                     <div className="min-w-0">
                       <p className="text-[14px] font-semibold text-[#0D0D0D] group-hover:text-[#06B6D4] transition-colors truncate">{ev.name}</p>
@@ -155,7 +152,7 @@ export default async function AdminDashboard() {
         <div className="rounded-2xl p-6" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(20px) saturate(1.3)", border: "1px solid rgba(6,182,212,0.15)", boxShadow: "0 2px 16px rgba(6,182,212,0.07), inset 0 1px 0 rgba(255,255,255,0.60)" }}>
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-display text-[17px] font-semibold text-[#0D0D0D]">Recent Enquiries</h2>
-            <Link href="/admin/enquiries" className="text-[13px] font-semibold transition-colors" style={{ color: "#06B6D4" }} onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#0D9488"; }} onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#06B6D4"; }}>View all →</Link>
+            <Link href="/admin/enquiries" className="text-[13px] font-semibold text-[#06B6D4] hover:text-[#0D9488] transition-colors">View all →</Link>
           </div>
           {!recentEnquiries?.length ? (
             <div className="py-8 text-center">
@@ -167,10 +164,7 @@ export default async function AdminDashboard() {
                 const s = statusStyle[enq.status] ?? { bg: "#F3F4F6", color: "#6B7280" };
                 return (
                   <Link key={enq.id} href="/admin/enquiries"
-                    className="flex items-center justify-between px-3 py-3 rounded-xl transition-all duration-[100ms] group hover:bg-[#ECFEFF]"
-                    style={{ borderLeft: "2px solid transparent" }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = "#06B6D4"; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = "transparent"; }}
+                    className="flex items-center justify-between px-3 py-3 rounded-xl transition-all duration-[100ms] group hover:bg-[#ECFEFF] border-l-2 border-l-transparent hover:border-l-[#06B6D4]"
                   >
                     <div className="min-w-0">
                       <p className="text-[14px] font-semibold text-[#0D0D0D] group-hover:text-[#06B6D4] transition-colors truncate">{enq.company_name}</p>
