@@ -50,6 +50,17 @@ export async function POST(request: NextRequest) {
 
   const adminSupabase = createAdminClient();
 
+  // Check if email already exists in public.users
+  const { data: existing } = await adminSupabase
+    .from("users")
+    .select("id")
+    .eq("email", email)
+    .maybeSingle();
+
+  if (existing) {
+    return NextResponse.json({ error: "A user with this email already exists." }, { status: 409 });
+  }
+
   // Create auth user
   const { data: authData, error: authErr } = await adminSupabase.auth.admin.createUser({
     email,
@@ -57,14 +68,20 @@ export async function POST(request: NextRequest) {
     email_confirm: true,
   });
 
-  if (authErr) return NextResponse.json({ error: authErr.message }, { status: 400 });
+  if (authErr) {
+    const msg = authErr.message.toLowerCase();
+    if (msg.includes("already") || msg.includes("exists")) {
+      return NextResponse.json({ error: "A user with this email already exists." }, { status: 409 });
+    }
+    return NextResponse.json({ error: authErr.message }, { status: 400 });
+  }
 
   const newUserId = authData.user.id;
 
   // Insert into users table
   const { data: newUser, error: insertErr } = await adminSupabase
     .from("users")
-    .insert({
+    .upsert({
       id: newUserId,
       name,
       email,
