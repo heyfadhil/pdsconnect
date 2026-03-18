@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude mcp:*)",
+      "Bash(\"/c/Users/User/AppData/Roaming/Claude/claude-code/2.1.76/claude.exe\" --version)",
+      "Bash(cmd.exe /c \"dir C:\\\\Users\\\\User\\\\AppData\\\\Roaming\\\\Claude\\\\claude-code\\\\2.1.76\"\")",
+      "Bash(cmd.exe /c \"dir C:\\\\Users\\\\User\\\\AppData\\\\Roaming\\\\Claude\\\\claude-code\\\\2.1.76\\\\\")",
+      "Bash(cmd.exe /c \"if exist C:\\\\Users\\\\User\\\\AppData\\\\Roaming\\\\Claude\\\\claude-code\\\\2.1.76\\\\claude.exe \\(echo FOUND\\) else \\(echo NOT FOUND\\)\")",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --app --eslint --no-src-dir --no-turbopack --import-alias \"@/*\" --yes)",
+      "Bash(npm --version)",
+      "Read(//usr/local/**)",
+      "Read(//usr/**)",
+      "Bash(command -v node)",
+      "Read(//c/Program Files/nodejs//**)",
+      "Read(//c/Users/User/AppData/Roaming/**)",
+      "Read(//c/Users/User/**)",
+      "Read(//c/Users/User/AppData/Local/**)",
+      "Bash(export PATH=\"/c/Program Files/nodejs:$PATH\")"
+    ]
+  }
+}
