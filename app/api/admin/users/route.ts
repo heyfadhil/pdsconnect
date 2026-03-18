@@ -50,14 +50,14 @@ export async function POST(request: NextRequest) {
 
   const adminSupabase = createAdminClient();
 
-  // Check if email already exists in public.users
-  const { data: existing } = await adminSupabase
+  // Check if email already exists in public.users (case-insensitive)
+  const { data: existingByEmail } = await adminSupabase
     .from("users")
     .select("id")
-    .eq("email", email)
+    .ilike("email", email)
     .maybeSingle();
 
-  if (existing) {
+  if (existingByEmail) {
     return NextResponse.json({ error: "A user with this email already exists." }, { status: 409 });
   }
 
@@ -78,27 +78,35 @@ export async function POST(request: NextRequest) {
 
   const newUserId = authData.user.id;
 
-  // Insert into users table
-  const { data: newUser, error: insertErr } = await adminSupabase
+  // Check if a profile row already exists for this auth ID (orphaned from previous attempt)
+  const { data: existingProfile } = await adminSupabase
     .from("users")
-    .upsert({
-      id: newUserId,
-      name,
-      email,
-      company_name,
-      role,
-      is_active: true,
-      welcome_sent: false,
-      industry_id: industry_id || null,
-      tags: tags || null,
-    })
-    .select("id, name, email, company_name, role, is_active, welcome_sent")
-    .single();
+    .select("id")
+    .eq("id", newUserId)
+    .maybeSingle();
 
-  if (insertErr) {
-    // Rollback: delete the auth user
-    await adminSupabase.auth.admin.deleteUser(newUserId);
-    return NextResponse.json({ error: insertErr.message }, { status: 500 });
+  let newUser;
+  if (existingProfile) {
+    // Update the orphaned row
+    const { data, error: updateErr } = await adminSupabase
+      .from("users")
+      .update({ name, email, company_name, role, is_active: true, industry_id: industry_id || null, tags: tags || null })
+      .eq("id", newUserId)
+      .select("id, name, email, company_name, role, is_active, welcome_sent")
+      .single();
+    if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
+    newUser = data;
+  } else {
+    const { data, error: insertErr } = await adminSupabase
+      .from("users")
+      .insert({ id: newUserId, name, email, company_name, role, is_active: true, welcome_sent: false, industry_id: industry_id || null, tags: tags || null })
+      .select("id, name, email, company_name, role, is_active, welcome_sent")
+      .single();
+    if (insertErr) {
+      await adminSupabase.auth.admin.deleteUser(newUserId);
+      return NextResponse.json({ error: insertErr.message }, { status: 500 });
+    }
+    newUser = data;
   }
 
   return NextResponse.json({ user: newUser }, { status: 201 });
