@@ -81,7 +81,7 @@ export default function FeaturesSection() {
       <div className="max-w-content mx-auto px-5 md:px-10">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <p className="reveal label uppercase text-calm-blue tracking-[0.08em] font-semibold mb-4">
+          <p className="reveal label uppercase tracking-[0.08em] font-semibold mb-4" style={{ color: "#06B6D4" }}>
             Why PDS Connect
           </p>
           <h2 className="reveal font-display text-heading-1 font-bold text-carbon-black mb-5">
@@ -98,11 +98,33 @@ export default function FeaturesSection() {
           {features.map((feature) => (
             <div
               key={feature.title}
-              className="reveal group bg-white rounded-2xl p-8 border border-light-border shadow-sm transition-all duration-base hover:-translate-y-1 hover:shadow-lg hover:border-sky-blue"
+              className="reveal group bg-white rounded-2xl p-8 border border-light-border shadow-sm"
+              style={{
+                transition: "all 250ms cubic-bezier(0.34,1.56,0.64,1)",
+              }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.transform = "translateY(-6px) scale(1.01)";
+                el.style.boxShadow = "0 12px 40px rgba(6,182,212,0.18)";
+                el.style.borderColor = "#06B6D4";
+                el.style.borderWidth = "1.5px";
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.transform = "";
+                el.style.boxShadow = "";
+                el.style.borderColor = "";
+                el.style.borderWidth = "";
+              }}
             >
-              {/* Icon container */}
-              <div className="w-12 h-12 rounded-xl bg-pale-blue-tint flex items-center justify-center text-calm-blue mb-5 transition-colors duration-fast group-hover:bg-calm-blue group-hover:text-white">
-                {feature.icon}
+              {/* Icon container — gradient bg (blue→cyan) */}
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-all duration-[150ms] group-hover:shadow-[0_0_16px_rgba(6,182,212,0.40)]"
+                style={{
+                  background: "linear-gradient(135deg, #2E7FD9 0%, #06B6D4 100%)",
+                }}
+              >
+                <span className="text-white">{feature.icon}</span>
               </div>
 
               <h3 className="font-display text-heading-3 font-semibold text-carbon-black mb-3">

@@ -11,7 +11,7 @@ export default function WhatIsPDS() {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Text */}
           <div>
-            <p className="reveal label uppercase text-calm-blue tracking-[0.08em] font-semibold mb-4">
+            <p className="reveal label uppercase tracking-[0.08em] font-semibold mb-4" style={{ color: "#06B6D4" }}>
               About the Platform
             </p>
             <h2 className="reveal font-display text-heading-1 font-bold text-carbon-black mb-6">
@@ -79,9 +79,9 @@ export default function WhatIsPDS() {
 
                 {/* Connection line */}
                 <div className="flex-1 flex flex-col items-center gap-1 px-4">
-                  <div className="w-full h-0.5 bg-gradient-to-r from-calm-blue via-sky-blue to-calm-blue rounded-full" />
-                  <span className="text-[10px] font-semibold text-calm-blue uppercase tracking-widest">Match</span>
-                  <div className="w-full h-0.5 bg-gradient-to-r from-calm-blue via-sky-blue to-calm-blue rounded-full" />
+                  <div className="w-full h-0.5 rounded-full" style={{ background: "linear-gradient(90deg, #2E7FD9, #06B6D4, #14B8A6)" }} />
+                  <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#06B6D4" }}>Match</span>
+                  <div className="w-full h-0.5 rounded-full" style={{ background: "linear-gradient(90deg, #2E7FD9, #06B6D4, #14B8A6)" }} />
                 </div>
 
                 <div className="text-center">
@@ -103,9 +103,9 @@ export default function WhatIsPDS() {
                       key={s}
                       className="px-3 py-1.5 rounded-full text-[11px] font-semibold"
                       style={{
-                        background: i === 2 ? "#2E7FD9" : "#EEF5FC",
-                        color: i === 2 ? "#fff" : "#2E7FD9",
-                        border: `1px solid ${i === 2 ? "transparent" : "#D8E6F5"}`,
+                        background: i === 2 ? "linear-gradient(135deg, #2E7FD9, #06B6D4)" : "#ECFEFF",
+                        color: i === 2 ? "#fff" : "#06B6D4",
+                        border: `1px solid ${i === 2 ? "transparent" : "rgba(6,182,212,0.25)"}`,
                       }}
                     >
                       {i < 2 ? `✓ ` : ""}{s}

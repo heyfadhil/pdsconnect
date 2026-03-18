@@ -58,8 +58,12 @@ export default async function AdminDashboard() {
         </div>
         <Link
           href="/admin/events/new"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-white text-sm font-semibold transition-all hover:-translate-y-0.5"
-          style={{ background: "linear-gradient(135deg, #2E7FD9 0%, #1A5FAA 100%)", boxShadow: "0 4px 14px rgba(46,127,217,0.30)" }}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-white text-sm font-semibold transition-all duration-[150ms] hover:-translate-y-[3px] hover:scale-[1.02] active:scale-[0.98]"
+          style={{
+            background: "linear-gradient(135deg, #2E7FD9 0%, #06B6D4 50%, #14B8A6 100%)",
+            boxShadow: "0 4px 16px rgba(6,182,212,0.30)",
+            transitionTimingFunction: "cubic-bezier(0.34,1.56,0.64,1)",
+          }}
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
           New Event
@@ -111,15 +115,15 @@ export default async function AdminDashboard() {
       <div className="grid lg:grid-cols-2 gap-6">
 
         {/* Recent Events */}
-        <div className="rounded-2xl p-6" style={{ background: "#FFFFFF", border: "1px solid #D8E6F5", boxShadow: "0 2px 12px rgba(46,127,217,0.06)" }}>
+        <div className="rounded-2xl p-6" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(20px) saturate(1.3)", border: "1px solid rgba(6,182,212,0.15)", boxShadow: "0 2px 16px rgba(6,182,212,0.07), inset 0 1px 0 rgba(255,255,255,0.60)" }}>
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-display text-[17px] font-semibold text-[#0D0D0D]">Recent Events</h2>
-            <Link href="/admin/events" className="text-[13px] font-semibold text-[#2E7FD9] hover:text-[#1A5FAA] transition-colors">View all →</Link>
+            <Link href="/admin/events" className="text-[13px] font-semibold transition-colors" style={{ color: "#06B6D4" }} onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#0D9488"; }} onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#06B6D4"; }}>View all →</Link>
           </div>
           {!recentEvents?.length ? (
             <div className="py-8 text-center">
               <p className="text-[14px] text-[#8A8A8A] mb-3">No events yet.</p>
-              <Link href="/admin/events/new" className="text-[13px] font-semibold text-[#2E7FD9] hover:text-[#1A5FAA]">Create your first event →</Link>
+              <Link href="/admin/events/new" className="text-[13px] font-semibold" style={{ color: "#06B6D4" }}>Create your first event →</Link>
             </div>
           ) : (
             <div className="space-y-1">
@@ -127,10 +131,13 @@ export default async function AdminDashboard() {
                 const s = statusStyle[ev.status] ?? { bg: "#F3F4F6", color: "#6B7280" };
                 return (
                   <Link key={ev.id} href={`/admin/events/${ev.id}`}
-                    className="flex items-center justify-between px-3 py-3 rounded-xl transition-colors group hover:bg-[#F0F7FF]"
+                    className="flex items-center justify-between px-3 py-3 rounded-xl transition-all duration-[100ms] group hover:bg-[#ECFEFF]"
+                    style={{ borderLeft: "2px solid transparent" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = "#06B6D4"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = "transparent"; }}
                   >
                     <div className="min-w-0">
-                      <p className="text-[14px] font-semibold text-[#0D0D0D] group-hover:text-[#2E7FD9] transition-colors truncate">{ev.name}</p>
+                      <p className="text-[14px] font-semibold text-[#0D0D0D] group-hover:text-[#06B6D4] transition-colors truncate">{ev.name}</p>
                       <p className="text-[12px] text-[#8A8A8A] mt-0.5">
                         {ev.event_start_date ? new Date(ev.event_start_date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "No date set"}
                       </p>
@@ -145,10 +152,10 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Recent Enquiries */}
-        <div className="rounded-2xl p-6" style={{ background: "#FFFFFF", border: "1px solid #D8E6F5", boxShadow: "0 2px 12px rgba(46,127,217,0.06)" }}>
+        <div className="rounded-2xl p-6" style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(20px) saturate(1.3)", border: "1px solid rgba(6,182,212,0.15)", boxShadow: "0 2px 16px rgba(6,182,212,0.07), inset 0 1px 0 rgba(255,255,255,0.60)" }}>
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-display text-[17px] font-semibold text-[#0D0D0D]">Recent Enquiries</h2>
-            <Link href="/admin/enquiries" className="text-[13px] font-semibold text-[#2E7FD9] hover:text-[#1A5FAA] transition-colors">View all →</Link>
+            <Link href="/admin/enquiries" className="text-[13px] font-semibold transition-colors" style={{ color: "#06B6D4" }} onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#0D9488"; }} onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#06B6D4"; }}>View all →</Link>
           </div>
           {!recentEnquiries?.length ? (
             <div className="py-8 text-center">
@@ -160,10 +167,13 @@ export default async function AdminDashboard() {
                 const s = statusStyle[enq.status] ?? { bg: "#F3F4F6", color: "#6B7280" };
                 return (
                   <Link key={enq.id} href="/admin/enquiries"
-                    className="flex items-center justify-between px-3 py-3 rounded-xl transition-colors group hover:bg-[#F0F7FF]"
+                    className="flex items-center justify-between px-3 py-3 rounded-xl transition-all duration-[100ms] group hover:bg-[#ECFEFF]"
+                    style={{ borderLeft: "2px solid transparent" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = "#06B6D4"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderLeftColor = "transparent"; }}
                   >
                     <div className="min-w-0">
-                      <p className="text-[14px] font-semibold text-[#0D0D0D] group-hover:text-[#2E7FD9] transition-colors truncate">{enq.company_name}</p>
+                      <p className="text-[14px] font-semibold text-[#0D0D0D] group-hover:text-[#06B6D4] transition-colors truncate">{enq.company_name}</p>
                       <p className="text-[12px] text-[#8A8A8A] mt-0.5">{enq.full_name} · <span className="capitalize">{enq.role_interest}</span></p>
                     </div>
                     <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full capitalize flex-shrink-0 ml-3"

@@ -57,7 +57,7 @@ export default function HowItWorks() {
       <div className="max-w-content mx-auto px-5 md:px-10">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <p className="reveal label uppercase text-calm-blue tracking-[0.08em] font-semibold mb-4">
+          <p className="reveal label uppercase tracking-[0.08em] font-semibold mb-4" style={{ color: "#06B6D4" }}>
             Simple Process
           </p>
           <h2 className="reveal font-display text-heading-1 font-bold text-carbon-black mb-5">
@@ -72,8 +72,9 @@ export default function HowItWorks() {
         <div className="reveal-stagger relative">
           {/* Connector line (desktop) */}
           <div
-            className="hidden lg:block absolute top-[52px] left-[calc(16.66%-20px)] right-[calc(16.66%-20px)] h-0.5 bg-gradient-to-r from-light-border via-calm-blue to-light-border"
+            className="hidden lg:block absolute top-[52px] left-[calc(16.66%-20px)] right-[calc(16.66%-20px)] h-0.5"
             aria-hidden="true"
+            style={{ background: "linear-gradient(90deg, #D8E6F5, #06B6D4 50%, #D8E6F5)" }}
           />
 
           <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
@@ -81,13 +82,22 @@ export default function HowItWorks() {
               <div key={step.number} className="reveal flex flex-col items-center text-center">
                 {/* Step circle */}
                 <div className="relative mb-8">
-                  <div className="w-[104px] h-[104px] rounded-full bg-white border-2 border-light-border shadow-sm flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-pale-blue-tint flex items-center justify-center text-calm-blue">
+                  <div
+                    className="w-[104px] h-[104px] rounded-full bg-white border-2 shadow-sm flex items-center justify-center"
+                    style={{ borderColor: "rgba(6,182,212,0.25)" }}
+                  >
+                    <div
+                      className="w-16 h-16 rounded-full flex items-center justify-center text-white"
+                      style={{ background: "linear-gradient(135deg, #2E7FD9 0%, #06B6D4 100%)" }}
+                    >
                       {step.icon}
                     </div>
                   </div>
                   {/* Number badge */}
-                  <span className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-calm-blue text-white text-[13px] font-bold flex items-center justify-center shadow-md">
+                  <span
+                    className="absolute -top-1 -right-1 w-8 h-8 rounded-full text-white text-[13px] font-bold flex items-center justify-center shadow-md"
+                    style={{ background: "linear-gradient(135deg, #2E7FD9, #06B6D4)" }}
+                  >
                     {i + 1}
                   </span>
                 </div>

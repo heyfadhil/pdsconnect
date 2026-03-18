@@ -65,7 +65,7 @@ export default function InterestForm() {
   };
 
   const inputClass =
-    "w-full h-12 px-4 rounded-lg border-[1.5px] border-light-border bg-white text-ink-gray placeholder:text-mid-gray text-body-md transition-all duration-fast focus:outline-none focus:border-calm-blue focus:shadow-[0_0_0_3px_rgba(46,127,217,0.15)]";
+    "w-full h-12 px-4 rounded-lg border-[1.5px] border-light-border bg-white text-ink-gray placeholder:text-mid-gray text-body-md transition-all duration-[150ms] focus:outline-none focus:border-vivid-cyan focus:shadow-[0_0_0_3px_rgba(6,182,212,0.18)]";
 
   const labelClass = "block text-[14px] font-semibold text-carbon-black mb-1.5";
 
@@ -75,7 +75,7 @@ export default function InterestForm() {
         <div className="max-w-3xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
-            <p className="reveal label uppercase text-calm-blue tracking-[0.08em] font-semibold mb-4">
+            <p className="reveal label uppercase tracking-[0.08em] font-semibold mb-4" style={{ color: "#06B6D4" }}>
               Join PDS Connect
             </p>
             <h2 className="reveal font-display text-heading-1 font-bold text-carbon-black mb-5">
@@ -235,7 +235,12 @@ export default function InterestForm() {
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="flex items-center gap-2 px-8 py-3.5 rounded-lg bg-calm-blue text-white font-semibold text-[15px] transition-all duration-base hover:bg-deep-blue hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0"
+                  className="flex items-center gap-2 px-8 py-3.5 rounded-lg text-white font-semibold text-[15px] transition-all duration-[150ms] hover:-translate-y-[3px] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0"
+                  style={{
+                    background: "linear-gradient(135deg, #2E7FD9 0%, #06B6D4 50%, #14B8A6 100%)",
+                    boxShadow: "0 4px 20px rgba(6,182,212,0.30)",
+                    transitionTimingFunction: "cubic-bezier(0.34,1.56,0.64,1)",
+                  }}
                 >
                   {status === "loading" ? (
                     <>

@@ -25,7 +25,7 @@ export default function Footer() {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-[15px] font-medium text-mid-gray hover:text-white transition-colors duration-fast"
+                className="text-[15px] font-medium text-mid-gray transition-colors duration-[150ms] hover:text-electric-cyan"
               >
                 {link.label}
               </a>
@@ -33,7 +33,7 @@ export default function Footer() {
           </nav>
         </div>
 
-        <div className="h-px bg-white/10 mb-8" />
+        <div className="h-px mb-8" style={{ background: "rgba(6,182,212,0.15)" }} />
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <p className="text-body-sm text-mid-gray">

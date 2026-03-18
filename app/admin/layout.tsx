@@ -41,10 +41,10 @@ export default async function AdminLayout({
   return (
     <div
       className="min-h-screen"
-      style={{ background: "linear-gradient(145deg, #EEF5FC 0%, #F5F8FC 60%, #EBF2FA 100%)" }}
+      style={{ background: "linear-gradient(145deg, #EBF9FC 0%, #F5F8FC 50%, #E8F4F8 100%)" }}
     >
       <Sidebar userRole={profile.role} stalledCount={stalledCount ?? 0} />
-      <div className="ml-60">
+      <div className="ml-[72px]">
         <Topbar name={profile.name} role={profile.role} />
         <main className="min-h-[calc(100vh-64px)]">{children}</main>
       </div>
