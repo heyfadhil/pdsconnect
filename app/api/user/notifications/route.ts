@@ -28,8 +28,8 @@ export async function GET() {
     query = supabase
       .from("match_requests")
       .select("id", { count: "exact", head: true })
-      .eq("procurer_id", user.id)
-      .eq("procurer_notified", false);
+      .eq("seller_id", user.id)
+      .eq("seller_notified", false);
   }
 
   const { count } = await query;

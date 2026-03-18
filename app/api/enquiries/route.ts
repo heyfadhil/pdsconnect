@@ -54,8 +54,8 @@ export async function POST(request: NextRequest) {
       const roleLabel =
         role_interest === "buyer"
           ? "Buyer"
-          : role_interest === "procurer"
-            ? "Procurer"
+          : role_interest === "seller"
+            ? "Seller"
             : "Not sure yet";
 
       await resend.emails.send({

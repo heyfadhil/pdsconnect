@@ -21,7 +21,7 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
-export default function ProcurerDiscoverPage({ params }: Props) {
+export default function SellerDiscoverPage({ params }: Props) {
   const { id: eventId } = use(params);
 
   const [counterparts, setCounterparts] = useState<Counterpart[]>([]);

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import UserNav from "@/components/user/UserNav";
 
-export default async function ProcurerLayout({
+export default async function SellerLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -20,12 +20,12 @@ export default async function ProcurerLayout({
     .eq("id", user.id)
     .single();
 
-  if (!profile || profile.role !== "procurer") redirect("/login");
+  if (!profile || profile.role !== "seller") redirect("/login");
   if (!profile.is_active) redirect("/login?error=inactive");
 
   return (
     <div className="min-h-screen bg-off-white">
-      <UserNav userName={profile.name} userRole="procurer" />
+      <UserNav userName={profile.name} userRole="seller" />
       <main className="max-w-content mx-auto px-6 py-8">{children}</main>
     </div>
   );

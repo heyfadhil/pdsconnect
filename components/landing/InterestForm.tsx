@@ -200,7 +200,7 @@ export default function InterestForm() {
                       Select your role...
                     </option>
                     <option value="buyer">Buyer</option>
-                    <option value="procurer">Procurer</option>
+                    <option value="seller">Seller</option>
                     <option value="unsure">Not sure yet</option>
                   </select>
                 </div>

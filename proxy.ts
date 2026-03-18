@@ -79,8 +79,8 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // ── Procurer routes ───────────────────────────────────────
-  if (pathname.startsWith("/procurer")) {
+  // ── Seller routes ───────────────────────────────────────
+  if (pathname.startsWith("/seller")) {
     if (!user) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
@@ -90,7 +90,7 @@ export async function proxy(request: NextRequest) {
       .eq("id", user.id)
       .single();
 
-    if (profile?.role !== "procurer") {
+    if (profile?.role !== "seller") {
       return NextResponse.redirect(new URL("/login", request.url));
     }
   }
@@ -106,9 +106,9 @@ export async function proxy(request: NextRequest) {
     if (profile?.role === "buyer") {
       return NextResponse.redirect(new URL("/buyer/dashboard", request.url));
     }
-    if (profile?.role === "procurer") {
+    if (profile?.role === "seller") {
       return NextResponse.redirect(
-        new URL("/procurer/dashboard", request.url)
+        new URL("/seller/dashboard", request.url)
       );
     }
   }
@@ -124,5 +124,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/buyer/:path*", "/procurer/:path*", "/login", "/profile"],
+  matcher: ["/admin/:path*", "/buyer/:path*", "/seller/:path*", "/login", "/profile"],
 };

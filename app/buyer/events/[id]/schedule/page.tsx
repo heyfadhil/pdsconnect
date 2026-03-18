@@ -19,7 +19,7 @@ interface Company {
 interface Meeting {
   id: string;
   buyer: Company;
-  procurer: Company;
+  seller: Company;
   booked_slot: TimeSlot | null;
 }
 
@@ -81,7 +81,7 @@ async function downloadPDF(
     y += 4;
 
     const rows = day.meetings.map((m) => {
-      const counterpart = m.buyer.id === userId ? m.procurer : m.buyer;
+      const counterpart = m.buyer.id === userId ? m.seller : m.buyer;
       const start = m.booked_slot ? formatTime(m.booked_slot.start_time) : "";
       const end = m.booked_slot ? formatTime(m.booked_slot.end_time) : "";
       return [`${start} – ${end}`, counterpart.company_name, counterpart.name];
@@ -181,7 +181,7 @@ export default function BuyerSchedulePage({ params }: Props) {
                         Time
                       </th>
                       <th className="px-5 py-3 text-left font-semibold text-mid-gray uppercase tracking-wide text-label">
-                        Procurer
+                        Seller
                       </th>
                       <th className="px-5 py-3 text-left font-semibold text-mid-gray uppercase tracking-wide text-label hidden sm:table-cell">
                         Venue
@@ -190,7 +190,7 @@ export default function BuyerSchedulePage({ params }: Props) {
                   </thead>
                   <tbody>
                     {day.meetings.map((m) => {
-                      const counterpart = m.buyer.id === userId ? m.procurer : m.buyer;
+                      const counterpart = m.buyer.id === userId ? m.seller : m.buyer;
                       return (
                         <tr
                           key={m.id}

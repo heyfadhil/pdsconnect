@@ -19,7 +19,7 @@ interface Company {
 interface Meeting {
   id: string;
   buyer: Company;
-  procurer: Company;
+  seller: Company;
   booked_slot: TimeSlot | null;
 }
 
@@ -80,7 +80,7 @@ async function downloadPDF(
     y += 4;
 
     const rows = day.meetings.map((m) => {
-      const counterpart = m.procurer.id === userId ? m.buyer : m.procurer;
+      const counterpart = m.seller.id === userId ? m.buyer : m.seller;
       const start = m.booked_slot ? formatTime(m.booked_slot.start_time) : "";
       const end = m.booked_slot ? formatTime(m.booked_slot.end_time) : "";
       return [`${start} – ${end}`, counterpart.company_name, counterpart.name];
@@ -103,7 +103,7 @@ async function downloadPDF(
   doc.save(`schedule_${eventName.replace(/\s+/g, "_").toLowerCase()}.pdf`);
 }
 
-export default function ProcurerSchedulePage({ params }: Props) {
+export default function SellerSchedulePage({ params }: Props) {
   const { id: eventId } = use(params);
   const [schedule, setSchedule] = useState<DayGroup[]>([]);
   const [event, setEvent] = useState<{ name: string; venue_name?: string | null } | null>(null);
@@ -188,7 +188,7 @@ export default function ProcurerSchedulePage({ params }: Props) {
                   </thead>
                   <tbody>
                     {day.meetings.map((m) => {
-                      const counterpart = m.procurer.id === userId ? m.buyer : m.procurer;
+                      const counterpart = m.seller.id === userId ? m.buyer : m.seller;
                       return (
                         <tr
                           key={m.id}

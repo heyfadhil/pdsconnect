@@ -12,7 +12,7 @@ type Match = {
   updated_at: string;
   event_id: string;
   buyer: { id: string; name: string; company_name: string } | null;
-  procurer: { id: string; name: string; company_name: string } | null;
+  seller: { id: string; name: string; company_name: string } | null;
   booked_slot: { id: string; start_time: string; end_time: string } | null;
   events: { id: string; name: string } | null;
 };
@@ -109,7 +109,7 @@ export default function AdminMatchesPage() {
               <tr className="border-b border-light-border bg-off-white">
                 <th className="text-left px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-mid-gray">Event</th>
                 <th className="text-left px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-mid-gray">Buyer</th>
-                <th className="text-left px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-mid-gray">Procurer</th>
+                <th className="text-left px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-mid-gray">Seller</th>
                 <th className="text-left px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-mid-gray">Status</th>
                 <th className="text-left px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-mid-gray">Scheduled</th>
                 <th className="text-left px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-mid-gray">Created</th>
@@ -119,7 +119,7 @@ export default function AdminMatchesPage() {
             <tbody>
               {matches.map((m) => {
                 const buyer = m.buyer as unknown as { company_name: string; name: string } | null;
-                const procurer = m.procurer as unknown as { company_name: string; name: string } | null;
+                const seller = m.seller as unknown as { company_name: string; name: string } | null;
                 const slot = m.booked_slot as unknown as { start_time: string; end_time: string } | null;
                 const event = m.events as unknown as { id: string; name: string } | null;
                 return (
@@ -136,8 +136,8 @@ export default function AdminMatchesPage() {
                       <p className="text-[12px] text-mid-gray">{buyer?.name}</p>
                     </td>
                     <td className="px-5 py-4">
-                      <p className="font-semibold text-carbon-black">{procurer?.company_name ?? "—"}</p>
-                      <p className="text-[12px] text-mid-gray">{procurer?.name}</p>
+                      <p className="font-semibold text-carbon-black">{seller?.company_name ?? "—"}</p>
+                      <p className="text-[12px] text-mid-gray">{seller?.name}</p>
                     </td>
                     <td className="px-5 py-4">
                       <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full capitalize ${STATUS_COLORS[m.status] ?? "bg-gray-100 text-mid-gray"}`}>

@@ -34,7 +34,7 @@ function formatSlot(slot: TimeSlot) {
   return `${start.toLocaleDateString("en-MY", { weekday: "short", day: "numeric", month: "short" })} · ${start.toLocaleTimeString("en-MY", { hour: "2-digit", minute: "2-digit" })} – ${end.toLocaleTimeString("en-MY", { hour: "2-digit", minute: "2-digit" })}`;
 }
 
-export default function ProcurerInboxPage({ params }: Props) {
+export default function SellerInboxPage({ params }: Props) {
   const { id: eventId } = use(params);
   const [requests, setRequests] = useState<Request[]>([]);
   const [slots, setSlots] = useState<TimeSlot[]>([]);

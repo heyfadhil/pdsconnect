@@ -12,7 +12,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     .select(
       `id, status, cancel_reason, created_at, updated_at, time_slot_id,
        buyer:users!buyer_id (id, name, company_name),
-       procurer:users!procurer_id (id, name, company_name),
+       seller:users!seller_id (id, name, company_name),
        booked_slot:time_slots!time_slot_id (id, start_time, end_time)`
     )
     .eq("event_id", eventId)

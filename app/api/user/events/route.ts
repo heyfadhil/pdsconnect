@@ -17,7 +17,7 @@ export async function GET() {
          venue_name, venue_address,
          event_start_date, event_end_date,
          matchup_open_date, matchup_close_date,
-         max_matches_per_buyer, max_matches_per_procurer,
+         max_matches_per_buyer, max_matches_per_seller,
          status
        )`
     )
@@ -37,7 +37,7 @@ export async function GET() {
     matchup_open_date: string | null;
     matchup_close_date: string | null;
     max_matches_per_buyer: number | null;
-    max_matches_per_procurer: number | null;
+    max_matches_per_seller: number | null;
     status: string;
   };
 

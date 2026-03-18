@@ -11,10 +11,10 @@ interface EventData {
   event_start_date?: string | null;
   event_end_date?: string | null;
   isActive: boolean;
-  role_in_event: "buyer" | "procurer";
+  role_in_event: "buyer" | "seller";
 }
 
-export default function ProcurerDashboard() {
+export default function SellerDashboard() {
   const [events, setEvents] = useState<EventData[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +41,7 @@ export default function ProcurerDashboard() {
       <div>
         <h1 className="font-display font-bold text-heading-2 text-ink-gray">Dashboard</h1>
         <p className="text-body-md text-mid-gray mt-1">
-          Your events and matches as a Procurer.
+          Your events and matches as a Seller.
         </p>
       </div>
 
@@ -60,7 +60,7 @@ export default function ProcurerDashboard() {
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {active.map((e) => (
-                  <EventCard key={e.id} event={{ ...e, role_in_event: "procurer" }} />
+                  <EventCard key={e.id} event={{ ...e, role_in_event: "seller" }} />
                 ))}
               </div>
             </section>
@@ -73,7 +73,7 @@ export default function ProcurerDashboard() {
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {archived.map((e) => (
-                  <EventCard key={e.id} event={{ ...e, role_in_event: "procurer" }} />
+                  <EventCard key={e.id} event={{ ...e, role_in_event: "seller" }} />
                 ))}
               </div>
             </section>

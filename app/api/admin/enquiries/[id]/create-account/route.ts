@@ -33,7 +33,7 @@ export async function POST(
   const userId = authUser.user.id;
 
   // Insert user profile (inactive)
-  const role = enq.role_interest === "buyer" ? "buyer" : enq.role_interest === "procurer" ? "procurer" : "buyer";
+  const role = enq.role_interest === "buyer" ? "buyer" : enq.role_interest === "seller" ? "seller" : "buyer";
   await supabase.from("users").insert({
     id: userId,
     email: enq.email,

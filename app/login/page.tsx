@@ -52,11 +52,11 @@ export default function LoginPage() {
 
     if (profile.role === "buyer") {
       router.push("/buyer/dashboard");
-    } else if (profile.role === "procurer") {
-      router.push("/procurer/dashboard");
+    } else if (profile.role === "seller") {
+      router.push("/seller/dashboard");
     } else {
       await supabase.auth.signOut();
-      setError("This login is for Buyers and Procurers. Admin staff should use the admin portal.");
+      setError("This login is for Buyers and Sellers. Admin staff should use the admin portal.");
       setLoading(false);
       return;
     }

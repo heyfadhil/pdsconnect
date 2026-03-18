@@ -14,7 +14,7 @@ export default async function AdminDashboard() {
     { count: newEnquiries },
     { count: scheduledMeetings },
   ] = await Promise.all([
-    supabase.from("users").select("*", { count: "exact", head: true }).in("role", ["buyer", "procurer"]),
+    supabase.from("users").select("*", { count: "exact", head: true }).in("role", ["buyer", "seller"]),
     supabase.from("events").select("*", { count: "exact", head: true }),
     supabase.from("match_requests").select("*", { count: "exact", head: true }).in("status", ["pending", "awaiting_buyer", "negotiating"]),
     supabase.from("enquiries").select("*", { count: "exact", head: true }).eq("status", "new"),

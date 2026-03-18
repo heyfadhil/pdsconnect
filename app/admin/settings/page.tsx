@@ -7,7 +7,7 @@ type Settings = {
   negotiation_reminder_hours: number | null;
   negotiation_auto_cancel_hours: number | null;
   default_max_matches_buyer: number | null;
-  default_max_matches_procurer: number | null;
+  default_max_matches_seller: number | null;
   default_matchup_window_days: number | null;
   admin_notification_emails: string | null;
 };
@@ -18,7 +18,7 @@ export default function SystemSettingsPage() {
     negotiation_reminder_hours: 24,
     negotiation_auto_cancel_hours: 48,
     default_max_matches_buyer: 5,
-    default_max_matches_procurer: 5,
+    default_max_matches_seller: 5,
     default_matchup_window_days: 30,
     admin_notification_emails: "",
   });
@@ -38,7 +38,7 @@ export default function SystemSettingsPage() {
           negotiation_reminder_hours: s.negotiation_reminder_hours ?? 24,
           negotiation_auto_cancel_hours: s.negotiation_auto_cancel_hours ?? 48,
           default_max_matches_buyer: s.default_max_matches_buyer ?? 5,
-          default_max_matches_procurer: s.default_max_matches_procurer ?? 5,
+          default_max_matches_seller: s.default_max_matches_seller ?? 5,
           default_matchup_window_days: s.default_matchup_window_days ?? 30,
           admin_notification_emails: s.admin_notification_emails ?? "",
         });
@@ -131,9 +131,9 @@ export default function SystemSettingsPage() {
                 "Maximum number of match requests a buyer can send per event. Default: 5."
               )}
               {field(
-                "default_max_matches_procurer",
-                "Max matches per procurer",
-                "Maximum number of matches a procurer can receive per event. Default: 5."
+                "default_max_matches_seller",
+                "Max matches per seller",
+                "Maximum number of matches a seller can receive per event. Default: 5."
               )}
               {field(
                 "default_matchup_window_days",

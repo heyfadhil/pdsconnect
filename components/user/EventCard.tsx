@@ -8,7 +8,7 @@ interface EventData {
   event_start_date?: string | null;
   event_end_date?: string | null;
   isActive: boolean;
-  role_in_event: "buyer" | "procurer";
+  role_in_event: "buyer" | "seller";
 }
 
 function formatDate(d: string | null | undefined) {
@@ -74,7 +74,7 @@ export default function EventCard({ event }: { event: EventData }) {
           Discover
           <ArrowRight size={13} />
         </Link>
-        {event.role_in_event === "procurer" && (
+        {event.role_in_event === "seller" && (
           <Link
             href={`${base}/inbox`}
             className="px-3 py-1.5 rounded-lg border border-light-border text-ink-gray text-body-sm font-medium hover:bg-pale-blue-tint transition-colors"

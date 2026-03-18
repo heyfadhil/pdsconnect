@@ -14,7 +14,7 @@ interface Match {
   created_at: string;
   updated_at: string;
   buyer: { name: string; company_name: string };
-  procurer: { name: string; company_name: string };
+  seller: { name: string; company_name: string };
   booked_slot: { start_time: string; end_time: string } | null;
 }
 
@@ -53,7 +53,7 @@ export default function AdminMatchesPage() {
     const matchSearch =
       !s ||
       m.buyer?.company_name?.toLowerCase().includes(s) ||
-      m.procurer?.company_name?.toLowerCase().includes(s);
+      m.seller?.company_name?.toLowerCase().includes(s);
     const matchStatus = statusFilter === "all" || m.status === statusFilter;
     return matchSearch && matchStatus;
   });
@@ -123,7 +123,7 @@ export default function AdminMatchesPage() {
             <thead>
               <tr className="bg-pale-blue-tint border-b border-light-border">
                 <th className="px-5 py-3 text-left text-label font-semibold text-mid-gray uppercase tracking-wide">Buyer</th>
-                <th className="px-5 py-3 text-left text-label font-semibold text-mid-gray uppercase tracking-wide">Procurer</th>
+                <th className="px-5 py-3 text-left text-label font-semibold text-mid-gray uppercase tracking-wide">Seller</th>
                 <th className="px-5 py-3 text-left text-label font-semibold text-mid-gray uppercase tracking-wide">Status</th>
                 <th className="px-5 py-3 text-left text-label font-semibold text-mid-gray uppercase tracking-wide hidden sm:table-cell">Booked Slot</th>
                 <th className="px-5 py-3 text-left text-label font-semibold text-mid-gray uppercase tracking-wide hidden md:table-cell">Last Updated</th>
@@ -133,7 +133,7 @@ export default function AdminMatchesPage() {
               {filtered.map((m) => (
                 <tr key={m.id} className="border-b border-light-border last:border-0 hover:bg-off-white">
                   <td className="px-5 py-3 font-medium text-ink-gray">{m.buyer?.company_name ?? "—"}</td>
-                  <td className="px-5 py-3 font-medium text-ink-gray">{m.procurer?.company_name ?? "—"}</td>
+                  <td className="px-5 py-3 font-medium text-ink-gray">{m.seller?.company_name ?? "—"}</td>
                   <td className="px-5 py-3">
                     <span className={`px-2.5 py-0.5 rounded-full text-label font-semibold uppercase tracking-wide ${STATUS_STYLE[m.status]}`}>
                       {m.status.replace("_", " ")}

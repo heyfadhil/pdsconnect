@@ -20,7 +20,7 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
-export default function ProcurerMatchesPage({ params }: Props) {
+export default function SellerMatchesPage({ params }: Props) {
   const { id: eventId } = use(params);
   const [matches, setMatches] = useState<Match[]>([]);
   const [slots, setSlots] = useState<TimeSlot[]>([]);
@@ -108,7 +108,7 @@ export default function ProcurerMatchesPage({ params }: Props) {
             <MatchCard
               key={m.id}
               match={m}
-              myRole="procurer"
+              myRole="seller"
               myUserId={userId}
               eventId={eventId}
               availableSlots={slots}

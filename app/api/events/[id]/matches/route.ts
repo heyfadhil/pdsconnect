@@ -15,9 +15,9 @@ export async function GET(_req: NextRequest, { params }: Params) {
     .from("match_requests")
     .select(
       `id, status, cancel_reason, time_slot_id, created_at, updated_at,
-       buyer_notified, procurer_notified,
+       buyer_notified, seller_notified,
        buyer:users!buyer_id (id, name, company_name, logo_url, industry_id, industries(name)),
-       procurer:users!procurer_id (id, name, company_name, logo_url, industry_id, industries(name)),
+       seller:users!seller_id (id, name, company_name, logo_url, industry_id, industries(name)),
        booked_slot:time_slots!time_slot_id (id, start_time, end_time),
        time_negotiations (
          id, proposed_by, status, expires_at,
@@ -25,7 +25,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
        )`
     )
     .eq("event_id", eventId)
-    .or(`buyer_id.eq.${user.id},procurer_id.eq.${user.id}`)
+    .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -47,10 +47,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
   } else {
     await supabase
       .from("match_requests")
-      .update({ procurer_notified: true })
+      .update({ seller_notified: true })
       .eq("event_id", eventId)
-      .eq("procurer_id", user.id)
-      .eq("procurer_notified", false);
+      .eq("seller_id", user.id)
+      .eq("seller_notified", false);
   }
 
   return NextResponse.json({ matches: data ?? [] });
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest, { params }: Params) {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { procurer_id } = await request.json();
+  const { seller_id } = await request.json();
 
   // Verify buyer is participant in this event
   const { data: buyerPart } = await supabase
@@ -80,18 +80,18 @@ export async function POST(request: NextRequest, { params }: Params) {
   if (!buyerPart)
     return NextResponse.json({ error: "You are not an active buyer in this event." }, { status: 403 });
 
-  // Verify procurer is participant in this event
+  // Verify seller is participant in this event
   const { data: procPart } = await supabase
     .from("event_participants")
     .select("id")
     .eq("event_id", eventId)
-    .eq("user_id", procurer_id)
-    .eq("role_in_event", "procurer")
+    .eq("user_id", seller_id)
+    .eq("role_in_event", "seller")
     .eq("is_active", true)
     .single();
 
   if (!procPart)
-    return NextResponse.json({ error: "Invalid procurer for this event." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid seller for this event." }, { status: 400 });
 
   // Check no existing active match between them
   const { data: existing } = await supabase
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     .select("id, status")
     .eq("event_id", eventId)
     .eq("buyer_id", user.id)
-    .eq("procurer_id", procurer_id)
+    .eq("seller_id", seller_id)
     .not("status", "in", '("cancelled","declined")')
     .maybeSingle();
 
@@ -130,9 +130,9 @@ export async function POST(request: NextRequest, { params }: Params) {
     .insert({
       event_id: eventId,
       buyer_id: user.id,
-      procurer_id,
+      seller_id,
       status: "pending",
-      procurer_notified: false,
+      seller_notified: false,
     })
     .select()
     .single();

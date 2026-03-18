@@ -35,7 +35,7 @@ export async function PUT(request: NextRequest) {
     "negotiation_reminder_hours",
     "negotiation_auto_cancel_hours",
     "default_max_matches_buyer",
-    "default_max_matches_procurer",
+    "default_max_matches_seller",
     "default_matchup_window_days",
     "admin_notification_emails",
   ];

@@ -11,7 +11,7 @@ interface Profile {
   name: string;
   email: string;
   company_name: string;
-  role: "buyer" | "procurer";
+  role: "buyer" | "seller";
   bio?: string | null;
   logo_url?: string | null;
   website_url?: string | null;
@@ -127,7 +127,7 @@ export default function ProfilePage() {
             <div className="grid sm:grid-cols-2 gap-4">
               <ReadOnlyField label="Company Name" value={profile.company_name} />
               <ReadOnlyField label="Email" value={profile.email} />
-              <ReadOnlyField label="Role" value={profile.role === "buyer" ? "Buyer" : "Procurer"} />
+              <ReadOnlyField label="Role" value={profile.role === "buyer" ? "Buyer" : "Seller"} />
             </div>
 
             {/* Admin-managed fields */}

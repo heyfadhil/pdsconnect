@@ -129,7 +129,7 @@ export default function EditUserPage() {
               <label className={labelClass}>Role</label>
               <select value={form.role ?? ""} onChange={set("role")} className={inputClass}>
                 <option value="buyer">Buyer</option>
-                <option value="procurer">Procurer</option>
+                <option value="seller">Seller</option>
                 <option value="admin">Admin</option>
                 <option value="staff">Staff</option>
                 <option value="superadmin">Super Admin</option>

@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     name, description, venue_name, venue_address,
     event_start_date, event_end_date,
     matchup_open_date, matchup_close_date,
-    max_matches_per_buyer, max_matches_per_procurer,
+    max_matches_per_buyer, max_matches_per_seller,
     status = "draft",
   } = body;
 
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       matchup_open_date: matchup_open_date || null,
       matchup_close_date: matchup_close_date || null,
       max_matches_per_buyer: max_matches_per_buyer ?? null,
-      max_matches_per_procurer: max_matches_per_procurer ?? null,
+      max_matches_per_seller: max_matches_per_seller ?? null,
       status,
       created_by: user.id,
     })

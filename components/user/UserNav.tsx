@@ -8,7 +8,7 @@ import { User, LogOut, ChevronDown } from "lucide-react";
 
 interface Props {
   userName: string;
-  userRole: "buyer" | "procurer";
+  userRole: "buyer" | "seller";
 }
 
 export default function UserNav({ userName, userRole }: Props) {
@@ -33,7 +33,7 @@ export default function UserNav({ userName, userRole }: Props) {
   }
 
   // Detect if we're inside an event page and extract event id
-  const eventMatch = pathname.match(/\/(?:buyer|procurer)\/events\/([^/]+)/);
+  const eventMatch = pathname.match(/\/(?:buyer|seller)\/events\/([^/]+)/);
   const eventId = eventMatch?.[1];
 
   return (
@@ -53,7 +53,7 @@ export default function UserNav({ userName, userRole }: Props) {
                 label="Discover"
                 active={pathname.includes("/discover")}
               />
-              {userRole === "procurer" && (
+              {userRole === "seller" && (
                 <NavLink
                   href={`/${userRole}/events/${eventId}/inbox`}
                   label="Inbox"

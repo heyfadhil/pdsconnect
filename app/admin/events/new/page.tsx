@@ -15,14 +15,14 @@ type FormState = {
   matchup_open_date: string;
   matchup_close_date: string;
   max_matches_per_buyer: string;
-  max_matches_per_procurer: string;
+  max_matches_per_seller: string;
 };
 
 const initial: FormState = {
   name: "", description: "", venue_name: "", venue_address: "",
   event_start_date: "", event_end_date: "",
   matchup_open_date: "", matchup_close_date: "",
-  max_matches_per_buyer: "", max_matches_per_procurer: "",
+  max_matches_per_buyer: "", max_matches_per_seller: "",
 };
 
 export default function NewEventPage() {
@@ -47,7 +47,7 @@ export default function NewEventPage() {
         ...form,
         status,
         max_matches_per_buyer: form.max_matches_per_buyer ? parseInt(form.max_matches_per_buyer) : null,
-        max_matches_per_procurer: form.max_matches_per_procurer ? parseInt(form.max_matches_per_procurer) : null,
+        max_matches_per_seller: form.max_matches_per_seller ? parseInt(form.max_matches_per_seller) : null,
       }),
     });
 
@@ -144,8 +144,8 @@ export default function NewEventPage() {
               <input type="number" min="1" value={form.max_matches_per_buyer} onChange={set("max_matches_per_buyer")} placeholder="No limit" className={inputClass} />
             </div>
             <div>
-              <label className={labelClass}>Max Matches per Procurer</label>
-              <input type="number" min="1" value={form.max_matches_per_procurer} onChange={set("max_matches_per_procurer")} placeholder="No limit" className={inputClass} />
+              <label className={labelClass}>Max Matches per Seller</label>
+              <input type="number" min="1" value={form.max_matches_per_seller} onChange={set("max_matches_per_seller")} placeholder="No limit" className={inputClass} />
             </div>
           </div>
         </div>

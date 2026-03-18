@@ -25,7 +25,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     "name", "description", "venue_name", "venue_address",
     "event_start_date", "event_end_date",
     "matchup_open_date", "matchup_close_date",
-    "max_matches_per_buyer", "max_matches_per_procurer", "status",
+    "max_matches_per_buyer", "max_matches_per_seller", "status",
   ];
   const update: Record<string, unknown> = {};
   allowed.forEach((k) => { if (k in body) update[k] = body[k] ?? null; });

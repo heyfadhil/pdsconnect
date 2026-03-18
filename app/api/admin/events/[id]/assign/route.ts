@@ -75,7 +75,7 @@ export async function POST(request: NextRequest, { params }: Params) {
   const { data: allUsers } = await supabase
     .from("users")
     .select("id, name, company_name, bio, website_url, tags, industry_id, role, industries(name)")
-    .in("role", ["buyer", "procurer"])
+    .in("role", ["buyer", "seller"])
     .eq("is_active", true);
 
   const candidates = (allUsers ?? []).filter((u) => !alreadyInEvent.has(u.id));

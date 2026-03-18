@@ -12,7 +12,7 @@ type Match = {
   created_at: string;
   time_slot_id: string | null;
   buyer: { id: string; name: string; company_name: string } | null;
-  procurer: { id: string; name: string; company_name: string } | null;
+  seller: { id: string; name: string; company_name: string } | null;
   booked_slot: { id: string; start_time: string; end_time: string } | null;
 };
 
@@ -141,7 +141,7 @@ export default function AdminItineraryPage() {
                       <tr className="border-b border-light-border bg-off-white">
                         <th className="text-left px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-mid-gray w-32">Time</th>
                         <th className="text-left px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-mid-gray">Buyer</th>
-                        <th className="text-left px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-mid-gray">Procurer</th>
+                        <th className="text-left px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-mid-gray">Seller</th>
                         <th className="px-5 py-3" />
                       </tr>
                     </thead>
@@ -149,7 +149,7 @@ export default function AdminItineraryPage() {
                       {group.matches.map((m) => {
                         const slot = m.booked_slot as unknown as { start_time: string; end_time: string } | null;
                         const buyer = m.buyer as unknown as { company_name: string; name: string } | null;
-                        const procurer = m.procurer as unknown as { company_name: string; name: string } | null;
+                        const seller = m.seller as unknown as { company_name: string; name: string } | null;
                         const startTime = slot
                           ? new Date(slot.start_time).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
                           : "";
@@ -166,8 +166,8 @@ export default function AdminItineraryPage() {
                               <p className="text-[12px] text-mid-gray">{buyer?.name}</p>
                             </td>
                             <td className="px-5 py-4">
-                              <p className="font-semibold text-carbon-black">{procurer?.company_name ?? "—"}</p>
-                              <p className="text-[12px] text-mid-gray">{procurer?.name}</p>
+                              <p className="font-semibold text-carbon-black">{seller?.company_name ?? "—"}</p>
+                              <p className="text-[12px] text-mid-gray">{seller?.name}</p>
                             </td>
                             <td className="px-5 py-4 text-right">
                               <button

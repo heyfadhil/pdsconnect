@@ -10,7 +10,7 @@ type Event = {
   venue_name: string | null; venue_address: string | null;
   event_start_date: string | null; event_end_date: string | null;
   matchup_open_date: string | null; matchup_close_date: string | null;
-  max_matches_per_buyer: number | null; max_matches_per_procurer: number | null;
+  max_matches_per_buyer: number | null; max_matches_per_seller: number | null;
   status: string;
 };
 
@@ -137,7 +137,7 @@ export default function EventDetailPage() {
                 <div><label className={labelClass}>Matchup Opens</label><input type="date" value={form.matchup_open_date ?? ""} onChange={set("matchup_open_date")} className={inputClass} /></div>
                 <div><label className={labelClass}>Matchup Closes</label><input type="date" value={form.matchup_close_date ?? ""} onChange={set("matchup_close_date")} className={inputClass} /></div>
                 <div><label className={labelClass}>Max Matches / Buyer</label><input type="number" min="1" value={form.max_matches_per_buyer ?? ""} onChange={set("max_matches_per_buyer")} placeholder="No limit" className={inputClass} /></div>
-                <div><label className={labelClass}>Max Matches / Procurer</label><input type="number" min="1" value={form.max_matches_per_procurer ?? ""} onChange={set("max_matches_per_procurer")} placeholder="No limit" className={inputClass} /></div>
+                <div><label className={labelClass}>Max Matches / Seller</label><input type="number" min="1" value={form.max_matches_per_seller ?? ""} onChange={set("max_matches_per_seller")} placeholder="No limit" className={inputClass} /></div>
               </div>
               {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>}
               <div className="flex gap-3 pt-2">
@@ -155,7 +155,7 @@ export default function EventDetailPage() {
                 { label: "Matchup Opens", value: event.matchup_open_date ? new Date(event.matchup_open_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : null },
                 { label: "Matchup Closes", value: event.matchup_close_date ? new Date(event.matchup_close_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : null },
                 { label: "Max Buyer Matches", value: event.max_matches_per_buyer ?? "No limit" },
-                { label: "Max Procurer Matches", value: event.max_matches_per_procurer ?? "No limit" },
+                { label: "Max Seller Matches", value: event.max_matches_per_seller ?? "No limit" },
               ].map(({ label, value }) => (
                 <div key={label}>
                   <p className="text-[12px] font-semibold text-mid-gray uppercase tracking-wide">{label}</p>

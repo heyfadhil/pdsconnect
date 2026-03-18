@@ -14,11 +14,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const { data, error } = await supabase
     .from("match_requests")
     .select(
-      `id, status, created_at, procurer_notified,
+      `id, status, created_at, seller_notified,
        buyer:users!buyer_id (id, name, company_name, logo_url, bio, tags, industry_id, industries(name))`
     )
     .eq("event_id", eventId)
-    .eq("procurer_id", user.id)
+    .eq("seller_id", user.id)
     .eq("status", "pending")
     .order("created_at", { ascending: false });
 
@@ -27,11 +27,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
   // Mark inbox as seen
   await supabase
     .from("match_requests")
-    .update({ procurer_notified: true })
+    .update({ seller_notified: true })
     .eq("event_id", eventId)
-    .eq("procurer_id", user.id)
+    .eq("seller_id", user.id)
     .eq("status", "pending")
-    .eq("procurer_notified", false);
+    .eq("seller_notified", false);
 
   return NextResponse.json({ requests: data ?? [] });
 }

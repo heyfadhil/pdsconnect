@@ -20,7 +20,7 @@ export async function GET(request: NextRequest, { params }: Params) {
 
   if (!me) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
 
-  const counterpartRole = me.role === "buyer" ? "procurer" : "buyer";
+  const counterpartRole = me.role === "buyer" ? "seller" : "buyer";
 
   // Get all active counterparts in this event
   const { data: participants, error } = await supabase
@@ -41,14 +41,14 @@ export async function GET(request: NextRequest, { params }: Params) {
   // Get existing match requests from current user in this event
   const { data: existingMatches } = await supabase
     .from("match_requests")
-    .select("buyer_id, procurer_id, status")
+    .select("buyer_id, seller_id, status")
     .eq("event_id", eventId)
-    .or(`buyer_id.eq.${user.id},procurer_id.eq.${user.id}`)
+    .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
     .not("status", "in", '("cancelled","declined")');
 
   const requestedSet = new Set(
     (existingMatches ?? []).map((m) =>
-      me.role === "buyer" ? m.procurer_id : m.buyer_id
+      me.role === "buyer" ? m.seller_id : m.buyer_id
     )
   );
 

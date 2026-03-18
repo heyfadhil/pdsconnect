@@ -20,7 +20,7 @@ export default function WhatIsPDS() {
             <p className="reveal text-body-lg text-ink-gray leading-relaxed mb-6 max-w-[60ch]">
               PDS Connect is a structured, event-based business matching
               platform that brings together <strong className="text-carbon-black font-semibold">Buyers</strong> and{" "}
-              <strong className="text-carbon-black font-semibold">Procurers</strong> at organised events — making
+              <strong className="text-carbon-black font-semibold">Sellers</strong> at organised events — making
               meaningful B2B connections effortless and efficient.
             </p>
             <p className="reveal text-body-md text-ink-gray leading-relaxed max-w-[60ch]">
@@ -54,7 +54,7 @@ export default function WhatIsPDS() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-carbon-black">Procurers</p>
+                  <p className="text-sm font-semibold text-carbon-black">Sellers</p>
                   <p className="text-[12px] text-mid-gray">Review &amp; confirm</p>
                 </div>
               </div>
@@ -90,7 +90,7 @@ export default function WhatIsPDS() {
                       <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
                     </svg>
                   </div>
-                  <p className="text-sm font-semibold text-carbon-black">Procurer</p>
+                  <p className="text-sm font-semibold text-carbon-black">Seller</p>
                   <p className="text-[11px] text-mid-gray">Company B</p>
                 </div>
               </div>

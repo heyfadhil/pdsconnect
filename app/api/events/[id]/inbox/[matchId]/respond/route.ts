@@ -16,10 +16,10 @@ export async function POST(request: NextRequest, { params }: Params) {
   // Verify ownership
   const { data: match, error: matchErr } = await supabase
     .from("match_requests")
-    .select("id, status, buyer_id, procurer_id")
+    .select("id, status, buyer_id, seller_id")
     .eq("id", matchId)
     .eq("event_id", eventId)
-    .eq("procurer_id", user.id)
+    .eq("seller_id", user.id)
     .single();
 
   if (matchErr || !match)
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest, { params }: Params) {
 
     await supabase.from("time_negotiations").insert({
       match_request_id: matchId,
-      proposed_by: "procurer",
+      proposed_by: "seller",
       time_slot_id,
       status: "pending",
       expires_at: expiresAt,
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest, { params }: Params) {
         status: "awaiting_buyer",
         time_slot_id,
         buyer_notified: false,
-        procurer_notified: true,
+        seller_notified: true,
       })
       .eq("id", matchId);
 

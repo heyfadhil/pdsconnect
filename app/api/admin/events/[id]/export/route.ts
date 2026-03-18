@@ -66,23 +66,23 @@ export async function GET(request: NextRequest, { params }: Params) {
       .select(
         `status, cancel_reason, created_at,
          buyer:users!buyer_id (name, company_name),
-         procurer:users!procurer_id (name, company_name),
+         seller:users!seller_id (name, company_name),
          booked_slot:time_slots!time_slot_id (start_time, end_time)`
       )
       .eq("event_id", eventId)
       .order("created_at", { ascending: true });
 
     rows = [
-      ["Buyer Company", "Buyer Name", "Procurer Company", "Procurer Name", "Status", "Cancel Reason", "Scheduled Time", "Created"],
+      ["Buyer Company", "Buyer Name", "Seller Company", "Seller Name", "Status", "Cancel Reason", "Scheduled Time", "Created"],
       ...(data ?? []).map((m) => {
         const buyer = m.buyer as unknown as { name: string; company_name: string } | null;
-        const procurer = m.procurer as unknown as { name: string; company_name: string } | null;
+        const seller = m.seller as unknown as { name: string; company_name: string } | null;
         const slot = m.booked_slot as unknown as { start_time: string; end_time: string } | null;
         return [
           buyer?.company_name ?? "",
           buyer?.name ?? "",
-          procurer?.company_name ?? "",
-          procurer?.name ?? "",
+          seller?.company_name ?? "",
+          seller?.name ?? "",
           m.status,
           m.cancel_reason ?? "",
           slot ? new Date(slot.start_time).toLocaleString("en-GB") : "",
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest, { params }: Params) {
       .from("match_requests")
       .select(
         `buyer:users!buyer_id (name, company_name),
-         procurer:users!procurer_id (name, company_name),
+         seller:users!seller_id (name, company_name),
          booked_slot:time_slots!time_slot_id (start_time, end_time)`
       )
       .eq("event_id", eventId)
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest, { params }: Params) {
       .order("created_at", { ascending: true });
 
     rows = [
-      ["Date", "Start Time", "End Time", "Buyer Company", "Buyer Name", "Procurer Company", "Procurer Name"],
+      ["Date", "Start Time", "End Time", "Buyer Company", "Buyer Name", "Seller Company", "Seller Name"],
       ...(data ?? [])
         .filter((m) => m.booked_slot)
         .sort((a, b) => {
@@ -115,7 +115,7 @@ export async function GET(request: NextRequest, { params }: Params) {
         })
         .map((m) => {
           const buyer = m.buyer as unknown as { name: string; company_name: string } | null;
-          const procurer = m.procurer as unknown as { name: string; company_name: string } | null;
+          const seller = m.seller as unknown as { name: string; company_name: string } | null;
           const slot = m.booked_slot as unknown as { start_time: string; end_time: string } | null;
           const d = slot ? new Date(slot.start_time) : null;
           return [
@@ -124,8 +124,8 @@ export async function GET(request: NextRequest, { params }: Params) {
             slot ? new Date(slot.end_time).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "",
             buyer?.company_name ?? "",
             buyer?.name ?? "",
-            procurer?.company_name ?? "",
-            procurer?.name ?? "",
+            seller?.company_name ?? "",
+            seller?.name ?? "",
           ];
         }),
     ];

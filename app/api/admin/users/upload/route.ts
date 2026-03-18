@@ -62,8 +62,8 @@ export async function POST(request: NextRequest) {
       continue;
     }
 
-    if (!["buyer", "procurer"].includes(role)) {
-      errors.push({ row: rowNum, email, error: `Invalid role "${role}". Must be buyer or procurer.` });
+    if (!["buyer", "seller"].includes(role)) {
+      errors.push({ row: rowNum, email, error: `Invalid role "${role}". Must be buyer or seller.` });
       continue;
     }
 

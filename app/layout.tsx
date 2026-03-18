@@ -17,7 +17,7 @@ const sora = Sora({
 export const metadata: Metadata = {
   title: "PDS Connect — Business Matching Platform",
   description:
-    "PDS Connect facilitates structured meetings between Buyers and Procurers at organised events. Intelligent business matching, effortlessly.",
+    "PDS Connect facilitates structured meetings between Buyers and Sellers at organised events. Intelligent business matching, effortlessly.",
   keywords: ["business matching", "B2B", "procurement", "networking", "events"],
   openGraph: {
     title: "PDS Connect — Business Matching Platform",

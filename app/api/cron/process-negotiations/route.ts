@@ -38,7 +38,7 @@ export async function GET(request: Request) {
        match_requests (
          id, status, event_id,
          buyer:users!buyer_id (id, email, name, company_name),
-         procurer:users!procurer_id (id, email, name, company_name)
+         seller:users!seller_id (id, email, name, company_name)
        )`
     )
     .eq("status", "pending");
@@ -57,7 +57,7 @@ export async function GET(request: Request) {
       status: string;
       event_id: string;
       buyer: { id: string; email: string; name: string; company_name: string } | null;
-      procurer: { id: string; email: string; name: string; company_name: string } | null;
+      seller: { id: string; email: string; name: string; company_name: string } | null;
     } | null;
 
     if (!match) continue;
@@ -75,17 +75,17 @@ export async function GET(request: Request) {
         .eq("id", match.id);
 
       // Notify both parties
-      if (resend && match.buyer && match.procurer) {
+      if (resend && match.buyer && match.seller) {
         const responder =
-          neg.proposed_by === match.buyer.id ? match.procurer : match.buyer;
+          neg.proposed_by === match.buyer.id ? match.seller : match.buyer;
 
         await resend.emails.send({
           from: fromEmail,
-          to: [match.buyer.email, match.procurer.email],
+          to: [match.buyer.email, match.seller.email],
           subject: "Meeting Request Cancelled — No Response",
           html: `
             <p>Hi,</p>
-            <p>The meeting request between <strong>${match.buyer.company_name}</strong> and <strong>${match.procurer.company_name}</strong> has been automatically cancelled because no response was received within the required timeframe.</p>
+            <p>The meeting request between <strong>${match.buyer.company_name}</strong> and <strong>${match.seller.company_name}</strong> has been automatically cancelled because no response was received within the required timeframe.</p>
             <p>If you believe this is an error, please contact the event organiser.</p>
             <p>— PDS Connect Team</p>
           `,
@@ -111,9 +111,9 @@ export async function GET(request: Request) {
           .update({ reminder_sent: true } as Record<string, unknown>)
           .eq("id", neg.id);
 
-        if (resend && match.buyer && match.procurer) {
+        if (resend && match.buyer && match.seller) {
           const waitingOn =
-            neg.proposed_by === match.buyer.id ? match.procurer : match.buyer;
+            neg.proposed_by === match.buyer.id ? match.seller : match.buyer;
 
           await resend.emails.send({
             from: fromEmail,

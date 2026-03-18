@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     .select(
       `id, status, cancel_reason, created_at, updated_at, event_id,
        buyer:users!buyer_id (id, name, company_name),
-       procurer:users!procurer_id (id, name, company_name),
+       seller:users!seller_id (id, name, company_name),
        booked_slot:time_slots!time_slot_id (id, start_time, end_time),
        events (id, name)`
     )
@@ -32,10 +32,10 @@ export async function GET(request: NextRequest) {
     const q = search.toLowerCase();
     matches = matches.filter((m) => {
       const buyer = m.buyer as unknown as { company_name: string } | null;
-      const procurer = m.procurer as unknown as { company_name: string } | null;
+      const seller = m.seller as unknown as { company_name: string } | null;
       return (
         buyer?.company_name?.toLowerCase().includes(q) ||
-        procurer?.company_name?.toLowerCase().includes(q)
+        seller?.company_name?.toLowerCase().includes(q)
       );
     });
   }

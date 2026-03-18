@@ -82,26 +82,26 @@ export default function BuyerDiscoverPage({ params }: Props) {
     return matchSearch && matchIndustry && matchTag;
   });
 
-  async function requestMatch(procurerId: string) {
-    setRequesting(procurerId);
+  async function requestMatch(sellerId: string) {
+    setRequesting(sellerId);
     const res = await fetch(`/api/events/${eventId}/matches`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ procurer_id: procurerId }),
+      body: JSON.stringify({ seller_id: sellerId }),
     });
 
     if (res.ok) {
       setCounterparts((prev) =>
         prev.map((c) =>
-          c.id === procurerId ? { ...c, already_requested: true } : c
+          c.id === sellerId ? { ...c, already_requested: true } : c
         )
       );
       setAllCounterparts((prev) =>
         prev.map((c) =>
-          c.id === procurerId ? { ...c, already_requested: true } : c
+          c.id === sellerId ? { ...c, already_requested: true } : c
         )
       );
-      if (drawerProfile?.id === procurerId) {
+      if (drawerProfile?.id === sellerId) {
         setDrawerProfile((p) => p && { ...p, already_requested: true });
       }
     } else {
@@ -115,7 +115,7 @@ export default function BuyerDiscoverPage({ params }: Props) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64 text-mid-gray">
-        Loading procurers…
+        Loading sellers…
       </div>
     );
   }
@@ -127,11 +127,11 @@ export default function BuyerDiscoverPage({ params }: Props) {
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="font-display font-bold text-heading-2 text-ink-gray">Discover Procurers</h1>
+          <h1 className="font-display font-bold text-heading-2 text-ink-gray">Discover Sellers</h1>
           <p className="text-body-md text-mid-gray mt-1">
             {counterparts.length === allCounterparts.length
-              ? `${allCounterparts.length} procurers in this event`
-              : `Showing ${counterparts.length} matched procurers · ${allCounterparts.length} total`}
+              ? `${allCounterparts.length} sellers in this event`
+              : `Showing ${counterparts.length} matched sellers · ${allCounterparts.length} total`}
           </p>
         </div>
       </div>
@@ -196,7 +196,7 @@ export default function BuyerDiscoverPage({ params }: Props) {
       {/* Show all toggle when showing filtered results */}
       {counterparts.length < allCounterparts.length && !hasFilters && (
         <p className="text-body-sm text-mid-gray">
-          Showing procurers matching your industry/tags.{" "}
+          Showing sellers matching your industry/tags.{" "}
           <button
             onClick={() => setCounterparts(allCounterparts)}
             className="text-calm-blue hover:underline font-medium"
@@ -210,7 +210,7 @@ export default function BuyerDiscoverPage({ params }: Props) {
       {filtered.length === 0 ? (
         <div className="py-16 text-center text-mid-gray flex flex-col items-center gap-3">
           <SlidersHorizontal size={32} strokeWidth={1.2} />
-          <p className="text-body-md">No procurers found matching your filters.</p>
+          <p className="text-body-md">No sellers found matching your filters.</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -20,7 +20,7 @@ const statusStyle: Record<string, string> = {
 };
 
 const roleLabel: Record<string, string> = {
-  buyer: "Buyer", procurer: "Procurer", unsure: "Not sure",
+  buyer: "Buyer", seller: "Seller", unsure: "Not sure",
 };
 
 export default function EnquiriesPage() {

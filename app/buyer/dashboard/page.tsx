@@ -11,7 +11,7 @@ interface EventData {
   event_start_date?: string | null;
   event_end_date?: string | null;
   isActive: boolean;
-  role_in_event: "buyer" | "procurer";
+  role_in_event: "buyer" | "seller";
 }
 
 export default function BuyerDashboard() {

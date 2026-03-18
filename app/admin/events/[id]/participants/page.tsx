@@ -7,7 +7,7 @@ import { Search, UserPlus, X, Users, Mail } from "lucide-react";
 
 interface Participant {
   id: string;
-  role_in_event: "buyer" | "procurer";
+  role_in_event: "buyer" | "seller";
   is_active: boolean;
   users: {
     id: string;
@@ -39,7 +39,7 @@ export default function ParticipantsPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
   const [adding, setAdding] = useState<string | null>(null);
-  const [roleFilter, setRoleFilter] = useState<"all" | "buyer" | "procurer">("all");
+  const [roleFilter, setRoleFilter] = useState<"all" | "buyer" | "seller">("all");
 
   const load = useCallback(async () => {
     const [partRes, usersRes] = await Promise.all([
@@ -68,7 +68,7 @@ export default function ParticipantsPage() {
 
   const addCandidates = allUsers.filter((u) => {
     if (participantUserIds.has(u.id)) return false;
-    if (!["buyer", "procurer"].includes(u.role)) return false;
+    if (!["buyer", "seller"].includes(u.role)) return false;
     const s = addSearch.toLowerCase();
     return (
       !s ||
@@ -118,7 +118,7 @@ export default function ParticipantsPage() {
   }
 
   const buyers = participants.filter((p) => p.role_in_event === "buyer" && p.is_active).length;
-  const procurers = participants.filter((p) => p.role_in_event === "procurer" && p.is_active).length;
+  const sellers = participants.filter((p) => p.role_in_event === "seller" && p.is_active).length;
 
   if (loading) return <div className="p-8 text-mid-gray text-sm">Loading...</div>;
 
@@ -132,7 +132,7 @@ export default function ParticipantsPage() {
           </div>
           <h1 className="font-display text-heading-2 font-bold text-carbon-black">Participants</h1>
           <p className="text-body-sm text-mid-gray mt-1">
-            {buyers} buyer{buyers !== 1 ? "s" : ""} · {procurers} procurer{procurers !== 1 ? "s" : ""}
+            {buyers} buyer{buyers !== 1 ? "s" : ""} · {sellers} seller{sellers !== 1 ? "s" : ""}
           </p>
         </div>
         <div className="flex gap-2">
@@ -171,7 +171,7 @@ export default function ParticipantsPage() {
           />
         </div>
         <div className="flex gap-1 bg-off-white border border-light-border rounded-xl p-1">
-          {(["all", "buyer", "procurer"] as const).map((r) => (
+          {(["all", "buyer", "seller"] as const).map((r) => (
             <button
               key={r}
               onClick={() => setRoleFilter(r)}

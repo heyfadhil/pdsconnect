@@ -20,7 +20,7 @@ interface TimeSlot {
 
 interface Negotiation {
   id: string;
-  proposed_by: "buyer" | "procurer";
+  proposed_by: "buyer" | "seller";
   status: string;
   expires_at: string;
   time_slots: TimeSlot | null;
@@ -39,14 +39,14 @@ interface Match {
   status: MatchStatus;
   cancel_reason?: string | null;
   buyer: User;
-  procurer: User;
+  seller: User;
   booked_slot?: TimeSlot | null;
   time_negotiations: Negotiation[];
 }
 
 interface Props {
   match: Match;
-  myRole: "buyer" | "procurer";
+  myRole: "buyer" | "seller";
   myUserId: string;
   eventId: string;
   availableSlots: TimeSlot[];
@@ -89,7 +89,7 @@ export default function MatchCard({
   const [suggestOpen, setSuggestOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState("");
 
-  const counterpart = myRole === "buyer" ? match.procurer : match.buyer;
+  const counterpart = myRole === "buyer" ? match.seller : match.buyer;
 
   const pendingNeg = match.time_negotiations
     .filter((n) => n.status === "pending")
@@ -101,13 +101,13 @@ export default function MatchCard({
   const canCancel = isBuyer && match.status === "pending";
   const canAccept =
     (isBuyer && match.status === "awaiting_buyer") ||
-    (isBuyer && match.status === "negotiating" && pendingNeg?.proposed_by === "procurer") ||
+    (isBuyer && match.status === "negotiating" && pendingNeg?.proposed_by === "seller") ||
     (!isBuyer && match.status === "negotiating" && pendingNeg?.proposed_by === "buyer");
   const canReject = isBuyer && ["awaiting_buyer", "negotiating"].includes(match.status);
   const canSuggest =
     (isBuyer &&
       (match.status === "awaiting_buyer" ||
-        (match.status === "negotiating" && pendingNeg?.proposed_by === "procurer"))) ||
+        (match.status === "negotiating" && pendingNeg?.proposed_by === "seller"))) ||
     (!isBuyer && match.status === "negotiating" && pendingNeg?.proposed_by === "buyer");
 
   async function handle(action: string, slotId?: string) {

@@ -71,7 +71,7 @@ export default function HeroSection() {
             className="reveal text-[clamp(16px,2vw,18px)] text-white/80 leading-relaxed max-w-xl mb-10"
           >
             PDS Connect facilitates structured meetings between Buyers and
-            Procurers at organised events — driven by intelligent matching,
+            Sellers at organised events — driven by intelligent matching,
             built on trust.
           </p>
 
