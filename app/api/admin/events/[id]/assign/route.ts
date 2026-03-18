@@ -78,7 +78,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     .in("role", ["buyer", "seller"])
     .eq("is_active", true);
 
-  const candidates = (allUsers ?? []).filter((u) => !alreadyInEvent.has(u.id));
+  const candidates = (allUsers ?? []).filter((u) => !alreadyInEvent.has(u.id)).slice(0, 50);
 
   if (candidates.length === 0) {
     return NextResponse.json({ error: "No eligible users to analyze." }, { status: 400 });
@@ -176,9 +176,15 @@ ${userProfiles.join("\n\n---\n\n")}`;
     const cleaned = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "");
     geminiResults = JSON.parse(cleaned);
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const isQuota = msg.includes("429") || msg.includes("quota") || msg.includes("Too Many Requests");
     return NextResponse.json(
-      { error: `Gemini API error: ${err instanceof Error ? err.message : String(err)}` },
-      { status: 500 }
+      {
+        error: isQuota
+          ? "Gemini API quota exceeded. You have hit the free-tier limit. Please wait a few minutes and try again, or upgrade your Gemini API plan."
+          : `Gemini API error: ${msg}`,
+      },
+      { status: isQuota ? 429 : 500 }
     );
   }
 

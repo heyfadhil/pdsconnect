@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import * as XLSX from "xlsx";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -29,6 +30,7 @@ export async function GET(request: NextRequest, { params }: Params) {
   const safeEventName = eventName.replace(/[^a-z0-9_-]/gi, "_").toLowerCase();
 
   let rows: string[][] = [];
+  let sheetName = "Export";
   let filename = "";
 
   if (type === "participants") {
@@ -58,7 +60,8 @@ export async function GET(request: NextRequest, { params }: Params) {
         ];
       }),
     ];
-    filename = `${safeEventName}_participants.csv`;
+    sheetName = "Participants";
+    filename = `${safeEventName}_participants.xlsx`;
 
   } else if (type === "matches") {
     const { data } = await supabase
@@ -90,7 +93,8 @@ export async function GET(request: NextRequest, { params }: Params) {
         ];
       }),
     ];
-    filename = `${safeEventName}_matches.csv`;
+    sheetName = "Matches";
+    filename = `${safeEventName}_matches.xlsx`;
 
   } else if (type === "schedule") {
     const { data } = await supabase
@@ -129,21 +133,29 @@ export async function GET(request: NextRequest, { params }: Params) {
           ];
         }),
     ];
-    filename = `${safeEventName}_schedule.csv`;
+    sheetName = "Schedule";
+    filename = `${safeEventName}_schedule.xlsx`;
   } else {
     return NextResponse.json({ error: "Invalid export type." }, { status: 400 });
   }
 
-  // Build CSV
-  const csv = rows
-    .map((row) =>
-      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
-    )
-    .join("\n");
+  // Build Excel workbook
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
 
-  return new NextResponse(csv, {
+  // Auto-fit column widths based on content
+  const colWidths = rows[0].map((_, colIdx) =>
+    Math.min(50, Math.max(10, ...rows.map((row) => String(row[colIdx] ?? "").length)))
+  );
+  ws["!cols"] = colWidths.map((w) => ({ wch: w }));
+
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+
+  const buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+
+  return new NextResponse(buffer, {
     headers: {
-      "Content-Type": "text/csv; charset=utf-8",
+      "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "Content-Disposition": `attachment; filename="${filename}"`,
     },
   });

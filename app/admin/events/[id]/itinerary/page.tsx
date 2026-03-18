@@ -108,7 +108,7 @@ export default function AdminItineraryPage() {
               href={`/api/admin/events/${eventId}/export?type=schedule`}
               className="px-4 py-2 rounded-lg border border-light-border text-sm font-semibold text-ink-gray hover:border-calm-blue hover:text-calm-blue transition-all"
             >
-              Export CSV
+              Export Excel
             </a>
             <Link
               href={`/admin/events/${eventId}/matches`}

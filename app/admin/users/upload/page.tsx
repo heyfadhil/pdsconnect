@@ -82,7 +82,7 @@ export default function ExcelUploadPage() {
         </div>
         <p className="text-[12px] text-mid-gray mt-3">
           <strong>role</strong> must be <code className="font-mono">buyer</code> or <code className="font-mono">seller</code>.
-          Download <a href="/templates/user_upload_template.xlsx" className="text-calm-blue underline">template file →</a>
+          Download <a href="/api/admin/users/template" className="text-calm-blue underline">template file →</a>
         </p>
       </div>
 

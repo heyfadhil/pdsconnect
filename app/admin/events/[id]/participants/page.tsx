@@ -140,7 +140,7 @@ export default function ParticipantsPage() {
             href={`/api/admin/events/${eventId}/export?type=participants`}
             className="flex items-center gap-2 px-4 py-2 rounded-xl border border-light-border text-ink-gray text-body-sm font-medium hover:border-calm-blue hover:text-calm-blue transition-colors"
           >
-            Export CSV
+            Export Excel
           </a>
           <Link
             href={`/admin/events/${eventId}/assign`}
