@@ -34,10 +34,12 @@ export async function POST(
   const resetLink = linkData.properties.action_link;
 
   // Send welcome email via Resend
+  const fromEmail = process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
+
   if (process.env.RESEND_API_KEY) {
     const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({
-      from: "PDS Connect <noreply@pdsconnect.com>",
+    const { error: sendErr } = await resend.emails.send({
+      from: `PDS Connect <${fromEmail}>`,
       to: user.email,
       subject: "Welcome to PDS Connect — Set Your Password",
       html: `
@@ -61,9 +63,15 @@ export async function POST(
         </div>
       `,
     });
+
+    if (sendErr) {
+      return NextResponse.json({ error: `Email failed to send: ${sendErr.message}` }, { status: 500 });
+    }
+  } else {
+    return NextResponse.json({ error: "RESEND_API_KEY is not configured." }, { status: 500 });
   }
 
-  // Mark welcome_sent and is_active
+  // Mark welcome_sent and is_active only after successful send
   await supabase
     .from("users")
     .update({ welcome_sent: true, is_active: true })

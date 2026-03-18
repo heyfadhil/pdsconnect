@@ -30,9 +30,10 @@ export async function POST(
   }
 
   if (process.env.RESEND_API_KEY) {
+    const fromEmail = process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
     const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({
-      from: "PDS Connect <noreply@pdsconnect.com>",
+    const { error: sendErr } = await resend.emails.send({
+      from: `PDS Connect <${fromEmail}>`,
       to: user.email,
       subject: "PDS Connect — Password Reset Request",
       html: `
@@ -49,6 +50,9 @@ export async function POST(
         </div>
       `,
     });
+    if (sendErr) {
+      return NextResponse.json({ error: `Email failed to send: ${sendErr.message}` }, { status: 500 });
+    }
   }
 
   return NextResponse.json({ success: true });
