@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Sidebar from "@/components/admin/Sidebar";
+import Topbar from "@/components/admin/Topbar";
 
 export default async function AdminLayout({
   children,
@@ -38,10 +39,14 @@ export default async function AdminLayout({
     .lt("created_at", thresholdTime);
 
   return (
-    <div className="min-h-screen bg-off-white">
+    <div
+      className="min-h-screen"
+      style={{ background: "linear-gradient(145deg, #EEF5FC 0%, #F5F8FC 60%, #EBF2FA 100%)" }}
+    >
       <Sidebar userRole={profile.role} stalledCount={stalledCount ?? 0} />
       <div className="ml-60">
-        <main className="min-h-screen">{children}</main>
+        <Topbar name={profile.name} role={profile.role} />
+        <main className="min-h-[calc(100vh-64px)]">{children}</main>
       </div>
     </div>
   );

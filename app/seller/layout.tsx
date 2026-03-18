@@ -24,7 +24,7 @@ export default async function SellerLayout({
   if (!profile.is_active) redirect("/login?error=inactive");
 
   return (
-    <div className="min-h-screen bg-off-white">
+    <div className="min-h-screen" style={{ background: "linear-gradient(145deg, #EEF5FC 0%, #F5F8FC 60%, #EBF2FA 100%)" }}>
       <UserNav userName={profile.name} userRole="seller" />
       <main className="max-w-content mx-auto px-6 py-8">{children}</main>
     </div>

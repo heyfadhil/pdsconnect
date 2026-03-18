@@ -176,7 +176,7 @@ export default function Sidebar({ userRole, stalledCount = 0 }: { userRole: stri
           return (
             <div key={gi} className="mb-6">
               {group.label && (
-                <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">
+                <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em]" style={{ color: "rgba(255,255,255,0.35)" }}>
                   {group.label}
                 </p>
               )}
@@ -186,18 +186,19 @@ export default function Sidebar({ userRole, stalledCount = 0 }: { userRole: stri
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13.5px] font-medium transition-all duration-fast mb-0.5 ${
+                    className="flex items-center gap-3 px-3 py-2.5 text-[13.5px] transition-all duration-fast mb-0.5 rounded-lg group"
+                    style={
                       active
-                        ? "bg-calm-blue text-white"
-                        : "text-white/60 hover:bg-white/8 hover:text-white"
-                    }`}
+                        ? { background: "rgba(255,255,255,0.13)", boxShadow: "inset 3px 0 0 #5BABF0", color: "#FFFFFF", fontWeight: 600 }
+                        : { color: "rgba(255,255,255,0.58)", fontWeight: 500 }
+                    }
                   >
-                    <span className={active ? "text-white" : "text-white/50"}>
+                    <span style={{ color: active ? "#5BABF0" : "rgba(255,255,255,0.42)" }}>
                       {item.icon}
                     </span>
                     {item.label}
                     {item.badge != null && item.badge > 0 && (
-                      <span className="ml-auto bg-sky-blue text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                      <span className="ml-auto text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: "#5BABF0" }}>
                         {item.badge}
                       </span>
                     )}
@@ -213,7 +214,8 @@ export default function Sidebar({ userRole, stalledCount = 0 }: { userRole: stri
       <div className="px-3 py-4 border-t border-white/10">
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-[13.5px] font-medium text-white/50 hover:text-white hover:bg-white/8 transition-all duration-fast"
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-[13.5px] font-medium transition-all duration-fast hover:bg-[rgba(255,255,255,0.08)] hover:text-white"
+          style={{ color: "rgba(255,255,255,0.45)" }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
