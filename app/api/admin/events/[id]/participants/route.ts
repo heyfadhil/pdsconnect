@@ -7,137 +7,139 @@ type Params = { params: Promise<{ id: string }> };
 // GET — list all participants in an event
 export async function GET(_req: NextRequest, { params }: Params) {
   const { id: eventId } = await params;
-  const supabase = await createClient();
+  const adminSupabase = createAdminClient();
 
-  const { data, error } = await supabase
+  const { data, error } = await adminSupabase
     .from("event_participants")
     .select(
       `id, role_in_event, is_active, categories, tags,
        users (id, email, name, company_name, logo_url, is_active, industry_id, industries(name))`
     )
     .eq("event_id", eventId)
-    .order("created_at", { ascending: false });
+    .order("id", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ participants: data ?? [] });
 }
 
-// POST — add a user to the event (optionally sends "assigned" notification email)
+// POST — add one or many users to the event
+// Body: { user_id, role_in_event, send_email }  (single)
+//    or { user_ids: string[], send_email }        (bulk — uses each user's own role)
 export async function POST(request: NextRequest, { params }: Params) {
   const { id: eventId } = await params;
   const supabase = await createClient();
   const adminSupabase = createAdminClient();
 
-  const { user_id, role_in_event, send_email = false } = await request.json();
+  const body = await request.json();
+  const send_email: boolean = body.send_email ?? false;
 
-  if (!user_id || !role_in_event) {
-    return NextResponse.json(
-      { error: "user_id and role_in_event are required." },
-      { status: 400 }
-    );
+  // Normalise to array of { user_id }
+  let targets: { user_id: string }[];
+  if (Array.isArray(body.user_ids)) {
+    targets = body.user_ids.map((id: string) => ({ user_id: id }));
+  } else if (body.user_id) {
+    targets = [{ user_id: body.user_id }];
+  } else {
+    return NextResponse.json({ error: "user_id or user_ids required." }, { status: 400 });
   }
 
-  // Check if already a participant
-  const { data: existing } = await supabase
-    .from("event_participants")
-    .select("id, is_active")
-    .eq("event_id", eventId)
-    .eq("user_id", user_id)
-    .maybeSingle();
-
-  if (existing) {
-    // Re-activate if previously deactivated
-    if (!existing.is_active) {
-      const { data: updated } = await supabase
-        .from("event_participants")
-        .update({ is_active: true, role_in_event })
-        .eq("id", existing.id)
-        .select()
-        .single();
-      return NextResponse.json({ participant: updated, reactivated: true });
-    }
-    return NextResponse.json({ error: "User is already a participant in this event." }, { status: 409 });
-  }
-
-  // Get user info for email
-  const { data: userProfile } = await supabase
+  // Fetch all target users' profiles + their roles
+  const userIds = targets.map((t) => t.user_id);
+  const { data: userProfiles } = await adminSupabase
     .from("users")
-    .select("email, name, is_active")
-    .eq("id", user_id)
-    .single();
+    .select("id, email, name, role, is_active")
+    .in("id", userIds);
 
-  // Get event info for email
+  const profileMap = new Map((userProfiles ?? []).map((u) => [u.id, u]));
+
+  // Get event info (for emails)
   const { data: event } = await supabase
     .from("events")
-    .select("name, event_start_date, event_end_date, venue_name")
+    .select("name, event_start_date, venue_name")
     .eq("id", eventId)
     .single();
 
-  const { data: participant, error } = await supabase
+  // Check existing participants to skip duplicates
+  const { data: existing } = await adminSupabase
     .from("event_participants")
-    .insert({ event_id: eventId, user_id, role_in_event, is_active: true })
-    .select()
-    .single();
+    .select("user_id, id, is_active")
+    .eq("event_id", eventId)
+    .in("user_id", userIds);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  const existingMap = new Map((existing ?? []).map((e) => [e.user_id, e]));
 
-  // Send "assigned to event" email if user is active and email requested
-  if (send_email && userProfile?.is_active && userProfile.email && event) {
-    try {
-      const resendKey = process.env.RESEND_API_KEY;
-      if (resendKey) {
-        const { Resend } = await import("resend");
-        const resend = new Resend(resendKey);
+  let added = 0;
+  let reactivated = 0;
+  const errors: { user_id: string; error: string }[] = [];
 
-        const startDate = event.event_start_date
-          ? new Date(event.event_start_date).toLocaleDateString("en-MY", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })
-          : "TBD";
+  for (const { user_id } of targets) {
+    const profile = profileMap.get(user_id);
+    if (!profile) { errors.push({ user_id, error: "User not found." }); continue; }
 
-        await resend.emails.send({
-          from: "PDS Connect <noreply@pdsconnect.com>",
-          to: userProfile.email,
-          subject: `You've been added to ${event.name}`,
-          html: `
-            <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:40px 20px;">
-              <h2 style="color:#1A5FAA;margin-bottom:8px;">You've been added to an event</h2>
-              <p>Hi ${userProfile.name},</p>
-              <p>You have been assigned to participate in <strong>${event.name}</strong>.</p>
-              <table style="border:1px solid #D8E6F5;border-radius:8px;padding:16px;width:100%;margin:24px 0;">
-                <tr><td style="color:#8A8A8A;font-size:13px;">Event</td><td style="font-weight:600;">${event.name}</td></tr>
-                ${event.venue_name ? `<tr><td style="color:#8A8A8A;font-size:13px;">Venue</td><td>${event.venue_name}</td></tr>` : ""}
-                <tr><td style="color:#8A8A8A;font-size:13px;">Date</td><td>${startDate}</td></tr>
-              </table>
-              <p>Log in to your PDS Connect account to browse participants and start requesting matches.</p>
-              <a href="${process.env.NEXT_PUBLIC_APP_URL ?? "https://pdsconnect.com"}/login"
-                 style="display:inline-block;background:#2E7FD9;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:8px;">
-                Log In to PDS Connect
-              </a>
-            </div>
-          `,
-        });
+    const role_in_event = profile.role === "buyer" || profile.role === "seller" ? profile.role : null;
+    if (!role_in_event) { errors.push({ user_id, error: "User role must be buyer or seller." }); continue; }
 
-        // Log the email
-        await supabase.from("email_logs").insert({
-          user_id,
-          event_id: eventId,
-          type: "event_assigned",
-          status: "sent",
-        });
+    const existingEntry = existingMap.get(user_id);
 
-        // Update event participant record with email sent flag (if needed)
+    if (existingEntry) {
+      if (!existingEntry.is_active) {
         await adminSupabase
           .from("event_participants")
-          .update({ is_active: true })
-          .eq("id", participant.id);
+          .update({ is_active: true, role_in_event })
+          .eq("id", existingEntry.id);
+        reactivated++;
       }
-    } catch {
-      // Email failure is non-fatal — participant was still added
+      // already active — skip silently
+      continue;
+    }
+
+    const { error: insertErr } = await adminSupabase
+      .from("event_participants")
+      .insert({ event_id: eventId, user_id, role_in_event, is_active: true });
+
+    if (insertErr) { errors.push({ user_id, error: insertErr.message }); continue; }
+    added++;
+
+    // Send email if requested
+    if (send_email && profile.is_active && profile.email && event) {
+      try {
+        const resendKey = process.env.RESEND_API_KEY;
+        if (resendKey) {
+          const { Resend } = await import("resend");
+          const resend = new Resend(resendKey);
+          const startDate = event.event_start_date
+            ? new Date(event.event_start_date).toLocaleDateString("en-MY", { day: "numeric", month: "long", year: "numeric" })
+            : "TBD";
+
+          await resend.emails.send({
+            from: process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev",
+            to: profile.email,
+            subject: `You've been added to ${event.name}`,
+            html: `
+              <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:40px 20px;">
+                <h2 style="color:#1A5FAA;margin-bottom:8px;">You've been added to an event</h2>
+                <p>Hi ${profile.name},</p>
+                <p>You have been assigned to participate in <strong>${event.name}</strong>.</p>
+                <table style="border:1px solid #D8E6F5;border-radius:8px;padding:16px;width:100%;margin:24px 0;">
+                  <tr><td style="color:#8A8A8A;font-size:13px;">Event</td><td style="font-weight:600;">${event.name}</td></tr>
+                  ${event.venue_name ? `<tr><td style="color:#8A8A8A;font-size:13px;">Venue</td><td>${event.venue_name}</td></tr>` : ""}
+                  <tr><td style="color:#8A8A8A;font-size:13px;">Date</td><td>${startDate}</td></tr>
+                </table>
+                <a href="${process.env.NEXT_PUBLIC_APP_URL ?? "https://pdsconnect.com"}/login"
+                   style="display:inline-block;background:#2E7FD9;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;">
+                  Log In to PDS Connect
+                </a>
+              </div>
+            `,
+          });
+
+          await supabase.from("email_logs").insert({ user_id, event_id: eventId, type: "event_assigned", status: "sent" });
+        }
+      } catch {
+        // Non-fatal
+      }
     }
   }
 
-  return NextResponse.json({ participant }, { status: 201 });
+  return NextResponse.json({ added, reactivated, errors }, { status: 201 });
 }

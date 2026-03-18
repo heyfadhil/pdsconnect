@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Search, UserPlus, X, Users, Mail } from "lucide-react";
+import { Search, UserPlus, X, Users, Mail, Check } from "lucide-react";
 
 interface Participant {
   id: string;
@@ -38,8 +38,12 @@ export default function ParticipantsPage() {
   const [addSearch, setAddSearch] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
-  const [adding, setAdding] = useState<string | null>(null);
   const [roleFilter, setRoleFilter] = useState<"all" | "buyer" | "seller">("all");
+
+  // Bulk selection state
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [submitting, setSubmitting] = useState(false);
+  const [bulkResult, setBulkResult] = useState<{ added: number; reactivated: number; errors: { user_id: string; error: string }[] } | null>(null);
 
   const load = useCallback(async () => {
     const [partRes, usersRes] = await Promise.all([
@@ -78,32 +82,63 @@ export default function ParticipantsPage() {
     );
   });
 
-  async function addParticipant(user: AllUser, sendEmail: boolean) {
-    setAdding(user.id);
+  const allSelected = addCandidates.length > 0 && addCandidates.every((u) => selected.has(u.id));
+  const someSelected = addCandidates.some((u) => selected.has(u.id));
+
+  function toggleUser(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAll() {
+    if (allSelected) {
+      setSelected((prev) => {
+        const next = new Set(prev);
+        addCandidates.forEach((u) => next.delete(u.id));
+        return next;
+      });
+    } else {
+      setSelected((prev) => {
+        const next = new Set(prev);
+        addCandidates.forEach((u) => next.add(u.id));
+        return next;
+      });
+    }
+  }
+
+  async function handleBulkAdd(sendEmail: boolean) {
+    const ids = [...selected].filter((id) => addCandidates.some((u) => u.id === id));
+    if (!ids.length) return;
+    setSubmitting(true);
+    setBulkResult(null);
+
     const res = await fetch(`/api/admin/events/${eventId}/participants`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id: user.id,
-        role_in_event: user.role,
-        send_email: sendEmail,
-      }),
+      body: JSON.stringify({ user_ids: ids, send_email: sendEmail }),
     });
+
+    const data = await res.json();
+    setSubmitting(false);
+
     if (!res.ok) {
-      const d = await res.json();
-      alert(d.error ?? "Failed to add participant.");
-    } else {
-      await load();
+      alert(data.error ?? "Failed to add participants.");
+      return;
     }
-    setAdding(null);
+
+    setBulkResult(data);
+    setSelected(new Set());
+    await load();
   }
 
   async function removeParticipant(participantId: string) {
     if (!confirm("Remove this participant from the event?")) return;
     setRemoving(participantId);
-    await fetch(`/api/admin/events/${eventId}/participants/${participantId}`, {
-      method: "DELETE",
-    });
+    await fetch(`/api/admin/events/${eventId}/participants/${participantId}`, { method: "DELETE" });
     await load();
     setRemoving(null);
   }
@@ -117,8 +152,16 @@ export default function ParticipantsPage() {
     await load();
   }
 
+  function closeModal() {
+    setAddOpen(false);
+    setAddSearch("");
+    setSelected(new Set());
+    setBulkResult(null);
+  }
+
   const buyers = participants.filter((p) => p.role_in_event === "buyer" && p.is_active).length;
   const sellers = participants.filter((p) => p.role_in_event === "seller" && p.is_active).length;
+  const selectedCount = [...selected].filter((id) => addCandidates.some((u) => u.id === id)).length;
 
   if (loading) return <div className="p-8 text-mid-gray text-sm">Loading...</div>;
 
@@ -176,9 +219,7 @@ export default function ParticipantsPage() {
               key={r}
               onClick={() => setRoleFilter(r)}
               className={`px-3 py-1 rounded-lg text-body-sm font-medium transition-colors capitalize ${
-                roleFilter === r
-                  ? "bg-white shadow-xs text-calm-blue"
-                  : "text-mid-gray hover:text-ink-gray"
+                roleFilter === r ? "bg-white shadow-xs text-calm-blue" : "text-mid-gray hover:text-ink-gray"
               }`}
             >
               {r}
@@ -215,14 +256,10 @@ export default function ParticipantsPage() {
                       <p className="text-mid-gray text-[12px]">{p.users?.email}</p>
                     </div>
                   </td>
-                  <td className="px-5 py-4 text-mid-gray">
-                    {p.users?.industries?.name ?? "—"}
-                  </td>
+                  <td className="px-5 py-4 text-mid-gray">{p.users?.industries?.name ?? "—"}</td>
                   <td className="px-5 py-4">
                     <span className={`px-2.5 py-0.5 rounded-full text-label font-semibold uppercase tracking-wide ${
-                      p.role_in_event === "buyer"
-                        ? "bg-blue-50 text-blue-700"
-                        : "bg-purple-50 text-purple-700"
+                      p.role_in_event === "buyer" ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"
                     }`}>
                       {p.role_in_event}
                     </span>
@@ -258,69 +295,136 @@ export default function ParticipantsPage() {
       {/* Add manually modal */}
       {addOpen && (
         <>
-          <div
-            className="fixed inset-0 bg-black/30 z-40 backdrop-blur-sm"
-            onClick={() => setAddOpen(false)}
-          />
+          <div className="fixed inset-0 bg-black/30 z-40 backdrop-blur-sm" onClick={closeModal} />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl flex flex-col max-h-[80vh]">
-              <div className="flex items-center justify-between px-6 py-4 border-b border-light-border">
-                <h2 className="font-display font-semibold text-heading-4 text-ink-gray">Add Participant</h2>
-                <button onClick={() => setAddOpen(false)} className="p-1.5 rounded-lg hover:bg-off-white text-mid-gray">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl flex flex-col max-h-[85vh]">
+
+              {/* Modal header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-light-border shrink-0">
+                <div>
+                  <h2 className="font-display font-semibold text-heading-4 text-ink-gray">Add Participants</h2>
+                  {someSelected && (
+                    <p className="text-[12px] text-calm-blue mt-0.5">{selectedCount} selected</p>
+                  )}
+                </div>
+                <button onClick={closeModal} className="p-1.5 rounded-lg hover:bg-off-white text-mid-gray">
                   <X size={16} />
                 </button>
               </div>
-              <div className="px-6 py-4">
+
+              {/* Search */}
+              <div className="px-6 py-3 border-b border-light-border shrink-0">
                 <div className="relative">
                   <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-mid-gray" />
                   <input
                     autoFocus
                     type="text"
-                    placeholder="Search users by name, company, or email…"
+                    placeholder="Search by name, company, or email…"
                     value={addSearch}
                     onChange={(e) => setAddSearch(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 border border-light-border rounded-xl text-body-sm focus:outline-none focus:ring-2 focus:ring-calm-blue"
                   />
                 </div>
               </div>
-              <div className="flex-1 overflow-y-auto px-6 pb-4">
+
+              {/* Bulk result banner */}
+              {bulkResult && (
+                <div className="px-6 py-3 bg-emerald-50 border-b border-emerald-100 shrink-0">
+                  <p className="text-sm font-semibold text-emerald-700">
+                    {bulkResult.added} added{bulkResult.reactivated > 0 ? `, ${bulkResult.reactivated} reactivated` : ""}
+                    {bulkResult.errors.length > 0 ? ` · ${bulkResult.errors.length} failed` : ""}
+                  </p>
+                </div>
+              )}
+
+              {/* Select-all row */}
+              {addCandidates.length > 0 && (
+                <div
+                  className="flex items-center gap-3 px-6 py-2.5 border-b border-light-border bg-off-white shrink-0 cursor-pointer"
+                  onClick={toggleAll}
+                >
+                  <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                    allSelected ? "bg-calm-blue border-calm-blue" : someSelected ? "bg-calm-blue/30 border-calm-blue" : "border-light-border bg-white"
+                  }`}>
+                    {(allSelected || someSelected) && <Check size={10} className="text-white" strokeWidth={3} />}
+                  </div>
+                  <span className="text-body-sm font-medium text-mid-gray">
+                    {allSelected ? "Deselect all" : `Select all (${addCandidates.length})`}
+                  </span>
+                </div>
+              )}
+
+              {/* Candidate list */}
+              <div className="flex-1 overflow-y-auto px-6 py-3">
                 {addCandidates.length === 0 ? (
                   <p className="text-body-sm text-mid-gray text-center py-8">No eligible users found.</p>
                 ) : (
-                  <div className="flex flex-col gap-2">
-                    {addCandidates.slice(0, 50).map((u) => (
-                      <div
-                        key={u.id}
-                        className="flex items-center justify-between gap-3 p-3 rounded-xl border border-light-border hover:bg-off-white"
-                      >
-                        <div>
-                          <p className="font-medium text-body-sm text-ink-gray">{u.company_name}</p>
-                          <p className="text-[12px] text-mid-gray">{u.email} · {u.role} · {u.industries?.name ?? "No industry"}</p>
+                  <div className="flex flex-col gap-1.5">
+                    {addCandidates.map((u) => {
+                      const isSelected = selected.has(u.id);
+                      return (
+                        <div
+                          key={u.id}
+                          onClick={() => toggleUser(u.id)}
+                          className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
+                            isSelected
+                              ? "border-calm-blue bg-pale-blue-tint"
+                              : "border-light-border hover:bg-off-white"
+                          }`}
+                        >
+                          {/* Checkbox */}
+                          <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                            isSelected ? "bg-calm-blue border-calm-blue" : "border-light-border bg-white"
+                          }`}>
+                            {isSelected && <Check size={10} className="text-white" strokeWidth={3} />}
+                          </div>
+
+                          {/* User info */}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-body-sm text-ink-gray truncate">{u.company_name}</p>
+                            <p className="text-[12px] text-mid-gray truncate">
+                              {u.email} · <span className={u.role === "buyer" ? "text-blue-600" : "text-purple-600"}>{u.role}</span>
+                              {u.industries?.name ? ` · ${u.industries.name}` : ""}
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex gap-1.5 shrink-0">
-                          <button
-                            onClick={() => addParticipant(u, false)}
-                            disabled={adding === u.id}
-                            className="px-3 py-1.5 rounded-lg border border-light-border text-body-sm text-ink-gray hover:border-calm-blue hover:text-calm-blue disabled:opacity-50 transition-colors"
-                            title="Add without email notification"
-                          >
-                            Add
-                          </button>
-                          <button
-                            onClick={() => addParticipant(u, true)}
-                            disabled={adding === u.id}
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-calm-blue text-white text-body-sm hover:bg-deep-blue disabled:opacity-50 transition-colors"
-                            title="Add and send event notification email"
-                          >
-                            <Mail size={12} />
-                            + Email
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
+
+              {/* Sticky footer with bulk actions */}
+              <div className="px-6 py-4 border-t border-light-border shrink-0">
+                {selectedCount > 0 ? (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleBulkAdd(false)}
+                      disabled={submitting}
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-calm-blue text-white text-body-sm font-semibold hover:bg-deep-blue disabled:opacity-50 transition-colors"
+                    >
+                      {submitting ? (
+                        <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" /></svg>
+                      ) : (
+                        <UserPlus size={14} />
+                      )}
+                      Add {selectedCount} participant{selectedCount !== 1 ? "s" : ""}
+                    </button>
+                    <button
+                      onClick={() => handleBulkAdd(true)}
+                      disabled={submitting}
+                      className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-calm-blue text-calm-blue text-body-sm font-semibold hover:bg-pale-blue-tint disabled:opacity-50 transition-colors"
+                      title="Add and send event notification emails"
+                    >
+                      <Mail size={14} />
+                      + Email
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-center text-body-sm text-mid-gray">Select users above to add them</p>
+                )}
+              </div>
+
             </div>
           </div>
         </>
