@@ -54,9 +54,11 @@ export default function LoginPage() {
       router.push("/buyer/dashboard");
     } else if (profile.role === "seller") {
       router.push("/seller/dashboard");
+    } else if (["admin", "staff", "superadmin"].includes(profile.role)) {
+      router.push("/admin/dashboard");
     } else {
       await supabase.auth.signOut();
-      setError("This login is for Buyers and Sellers. Admin staff should use the admin portal.");
+      setError("Unrecognised account role. Please contact support.");
       setLoading(false);
       return;
     }

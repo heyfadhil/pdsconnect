@@ -23,6 +23,8 @@ export default function EditUserPage() {
   const [saving, setSaving] = useState(false);
   const [sending, setSending] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [settingPw, setSettingPw] = useState(false);
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
@@ -73,6 +75,20 @@ export default function EditUserPage() {
     const d = await res.json();
     setMsg({ type: res.ok ? "success" : "error", text: res.ok ? "Password reset email sent." : d.error });
     setResetting(false);
+  };
+
+  const handleSetPassword = async () => {
+    if (!newPassword) return;
+    setSettingPw(true); setMsg(null);
+    const res = await fetch(`/api/admin/users/${id}/set-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: newPassword }),
+    });
+    const d = await res.json();
+    setMsg({ type: res.ok ? "success" : "error", text: res.ok ? "Password updated successfully." : d.error });
+    if (res.ok) setNewPassword("");
+    setSettingPw(false);
   };
 
   const inputClass = "w-full h-10 px-3 rounded-lg border-[1.5px] border-light-border bg-white text-ink-gray text-sm focus:outline-none focus:border-calm-blue focus:shadow-[0_0_0_3px_rgba(46,127,217,0.15)] transition-all";
@@ -165,6 +181,26 @@ export default function EditUserPage() {
                 {resetting ? "Sending..." : "Send Password Reset"}
               </button>
             </div>
+          </div>
+
+          {/* Set password */}
+          <div className="bg-white rounded-2xl border border-light-border p-5 shadow-sm">
+            <h3 className="font-semibold text-carbon-black text-sm mb-3">Set Password</h3>
+            <p className="text-[12px] text-mid-gray mb-3">Directly set a new password for this user.</p>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="New password (min 8 chars)"
+              className="w-full h-9 px-3 rounded-lg border-[1.5px] border-light-border bg-white text-ink-gray text-sm focus:outline-none focus:border-calm-blue transition-all mb-2"
+            />
+            <button
+              onClick={handleSetPassword}
+              disabled={settingPw || newPassword.length < 8}
+              className="w-full py-2 rounded-lg bg-calm-blue text-white text-xs font-semibold hover:bg-deep-blue transition-colors disabled:opacity-50"
+            >
+              {settingPw ? "Updating..." : "Update Password"}
+            </button>
           </div>
 
           {/* Toggle active */}
