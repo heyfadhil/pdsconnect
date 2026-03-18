@@ -127,10 +127,7 @@ export default async function AdminDashboard() {
                 const s = statusStyle[ev.status] ?? { bg: "#F3F4F6", color: "#6B7280" };
                 return (
                   <Link key={ev.id} href={`/admin/events/${ev.id}`}
-                    className="flex items-center justify-between px-3 py-3 rounded-xl transition-colors group"
-                    style={{ background: "transparent" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "#F0F7FF")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    className="flex items-center justify-between px-3 py-3 rounded-xl transition-colors group hover:bg-[#F0F7FF]"
                   >
                     <div className="min-w-0">
                       <p className="text-[14px] font-semibold text-[#0D0D0D] group-hover:text-[#2E7FD9] transition-colors truncate">{ev.name}</p>
@@ -163,10 +160,7 @@ export default async function AdminDashboard() {
                 const s = statusStyle[enq.status] ?? { bg: "#F3F4F6", color: "#6B7280" };
                 return (
                   <Link key={enq.id} href="/admin/enquiries"
-                    className="flex items-center justify-between px-3 py-3 rounded-xl transition-colors group"
-                    style={{ background: "transparent" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "#F0F7FF")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    className="flex items-center justify-between px-3 py-3 rounded-xl transition-colors group hover:bg-[#F0F7FF]"
                   >
                     <div className="min-w-0">
                       <p className="text-[14px] font-semibold text-[#0D0D0D] group-hover:text-[#2E7FD9] transition-colors truncate">{enq.company_name}</p>
