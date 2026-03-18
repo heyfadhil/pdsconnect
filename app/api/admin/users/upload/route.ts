@@ -13,6 +13,11 @@ type Row = {
   industry?: string;
   bio?: string;
   logo_url?: string;
+  phone?: string;
+  mobile?: string;
+  title?: string;
+  business_type?: string;
+  item?: string;
 };
 
 export async function POST(request: NextRequest) {
@@ -78,16 +83,25 @@ export async function POST(request: NextRequest) {
       .eq("email", email)
       .single();
 
+    const extraFields = {
+      website_url: String(row.website_url ?? "").trim() || null,
+      bio: String(row.bio ?? "").trim() || null,
+      logo_url: String(row.logo_url ?? "").trim() || null,
+      phone: String(row.phone ?? "").trim() || null,
+      mobile: String(row.mobile ?? "").trim() || null,
+      title: String(row.title ?? "").trim() || null,
+      business_type: String(row.business_type ?? "").trim() || null,
+      item: String(row.item ?? "").trim() || null,
+    };
+
     if (existing) {
       // Update existing record
       await supabase.from("users").update({
         name,
         company_name,
         role,
-        website_url: String(row.website_url ?? "").trim() || null,
         industry_id,
-        bio: String(row.bio ?? "").trim() || null,
-        logo_url: String(row.logo_url ?? "").trim() || null,
+        ...extraFields,
       }).eq("id", existing.id);
       updated++;
     } else {
@@ -110,12 +124,10 @@ export async function POST(request: NextRequest) {
         name,
         company_name,
         role,
-        website_url: String(row.website_url ?? "").trim() || null,
         industry_id,
-        bio: String(row.bio ?? "").trim() || null,
-        logo_url: String(row.logo_url ?? "").trim() || null,
         is_active: true,
         welcome_sent: false,
+        ...extraFields,
       });
 
       if (profileErr) {

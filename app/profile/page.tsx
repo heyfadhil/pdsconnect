@@ -17,6 +17,9 @@ interface Profile {
   website_url?: string | null;
   tags?: string | null;
   industries?: { name: string } | null;
+  phone?: string | null;
+  mobile?: string | null;
+  title?: string | null;
 }
 
 export default function ProfilePage() {
@@ -27,6 +30,9 @@ export default function ProfilePage() {
   const [bio, setBio] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
+  const [phone, setPhone] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [title, setTitle] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
 
@@ -46,6 +52,9 @@ export default function ProfilePage() {
         setBio(p.bio ?? "");
         setLogoUrl(p.logo_url ?? "");
         setWebsiteUrl(p.website_url ?? "");
+        setPhone(p.phone ?? "");
+        setMobile(p.mobile ?? "");
+        setTitle(p.title ?? "");
       })
       .catch(() => router.push("/login"));
   }, [router]);
@@ -57,7 +66,7 @@ export default function ProfilePage() {
     const res = await fetch("/api/user/profile", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ bio, logo_url: logoUrl, website_url: websiteUrl }),
+      body: JSON.stringify({ bio, logo_url: logoUrl, website_url: websiteUrl, phone, mobile, title }),
     });
     setSaving(false);
     if (res.ok) {
@@ -166,15 +175,47 @@ export default function ProfilePage() {
               Editable Fields
             </h2>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-body-sm font-medium text-ink-gray">Website URL</label>
-              <input
-                type="url"
-                value={websiteUrl}
-                onChange={(e) => setWebsiteUrl(e.target.value)}
-                placeholder="https://yourcompany.com"
-                className="border border-light-border rounded-xl px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-calm-blue"
-              />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-body-sm font-medium text-ink-gray">Title / Position</label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. CEO, Sales Director"
+                  className="border border-light-border rounded-xl px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-calm-blue"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-body-sm font-medium text-ink-gray">Website URL</label>
+                <input
+                  type="url"
+                  value={websiteUrl}
+                  onChange={(e) => setWebsiteUrl(e.target.value)}
+                  placeholder="https://yourcompany.com"
+                  className="border border-light-border rounded-xl px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-calm-blue"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-body-sm font-medium text-ink-gray">Phone</label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+60 3-XXXX XXXX"
+                  className="border border-light-border rounded-xl px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-calm-blue"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-body-sm font-medium text-ink-gray">Mobile</label>
+                <input
+                  type="tel"
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value)}
+                  placeholder="+60 1X-XXXX XXXX"
+                  className="border border-light-border rounded-xl px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-calm-blue"
+                />
+              </div>
             </div>
 
             <div className="flex flex-col gap-1.5">

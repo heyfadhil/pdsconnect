@@ -10,6 +10,8 @@ type UserProfile = {
   role: string; website_url: string | null; industry_id: string | null;
   tags: string | null; bio: string | null; logo_url: string | null;
   is_active: boolean; welcome_sent: boolean;
+  phone: string | null; mobile: string | null; title: string | null;
+  business_type: string | null; item: string | null;
 };
 type Industry = { id: string; name: string };
 
@@ -118,9 +120,17 @@ export default function EditUserPage() {
             <h2 className="font-display text-heading-4 font-semibold text-carbon-black">Profile</h2>
             <div className="grid grid-cols-2 gap-4">
               <div><label className={labelClass}>Full Name</label><input value={form.name ?? ""} onChange={set("name")} className={inputClass} /></div>
-              <div><label className={labelClass}>Company</label><input value={form.company_name ?? ""} onChange={set("company_name")} className={inputClass} /></div>
+              <div><label className={labelClass}>Title / Position</label><input value={form.title ?? ""} onChange={set("title")} placeholder="e.g. CEO, Sales Director" className={inputClass} /></div>
               <div><label className={labelClass}>Email</label><input type="email" value={form.email ?? ""} onChange={set("email")} className={inputClass} /></div>
-              <div><label className={labelClass}>Website URL</label><input type="url" value={form.website_url ?? ""} onChange={set("website_url")} placeholder="https://" className={inputClass} /></div>
+              <div><label className={labelClass}>Phone</label><input type="tel" value={form.phone ?? ""} onChange={set("phone")} placeholder="+60 3-XXXX XXXX" className={inputClass} /></div>
+              <div><label className={labelClass}>Mobile</label><input type="tel" value={form.mobile ?? ""} onChange={set("mobile")} placeholder="+60 1X-XXXX XXXX" className={inputClass} /></div>
+              <div><label className={labelClass}>Website</label><input type="url" value={form.website_url ?? ""} onChange={set("website_url")} placeholder="https://" className={inputClass} /></div>
+              <div><label className={labelClass}>Company</label><input value={form.company_name ?? ""} onChange={set("company_name")} className={inputClass} /></div>
+              <div><label className={labelClass}>Business Type</label><input value={form.business_type ?? ""} onChange={set("business_type")} placeholder="e.g. SME, MNC, GLC" className={inputClass} /></div>
+            </div>
+            <div>
+              <label className={labelClass}>Item / Product-Service</label>
+              <input value={form.item ?? ""} onChange={set("item")} placeholder="e.g. Industrial machinery, Halal food products" className={inputClass} />
             </div>
             <div>
               <label className={labelClass}>Bio</label>
