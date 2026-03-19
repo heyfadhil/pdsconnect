@@ -93,9 +93,10 @@ export default function SellerMatchPage({ params }: { params: Promise<{ id: stri
   useEffect(() => { counterpartsRef.current = counterparts; }, [counterparts]);
   useEffect(() => { idxRef.current = idx; }, [idx]);
 
-  const current = counterparts[idx % Math.max(counterparts.length, 1)];
-  const next1 = counterparts[(idx + 1) % Math.max(counterparts.length, 1)];
-  const next2 = counterparts[(idx + 2) % Math.max(counterparts.length, 1)];
+  const clampedIdx = Math.min(idx, Math.max(counterparts.length - 1, 0));
+  const current = counterparts[clampedIdx];
+  const next1 = counterparts[clampedIdx + 1];
+  const next2 = counterparts[clampedIdx + 2];
 
   function applyTransform(t: string, transition = "none") {
     const card = cardRef.current;
@@ -128,8 +129,8 @@ export default function SellerMatchPage({ params }: { params: Promise<{ id: stri
     d.startY = e.clientY;
     d.dx = 0; d.dy = 0; d.dragging = true;
     const c = counterpartsRef.current;
-    const i = idxRef.current;
-    currentRef.current = c[i % Math.max(c.length, 1)] ?? null;
+    const i = Math.min(idxRef.current, Math.max(c.length - 1, 0));
+    currentRef.current = c[i] ?? null;
     cardRef.current?.setPointerCapture(e.pointerId);
     if (cardRef.current) cardRef.current.style.transition = "none";
     d.tapTimer = setTimeout(() => { d.tapTimer = null; }, 200);
@@ -175,7 +176,17 @@ export default function SellerMatchPage({ params }: { params: Promise<{ id: stri
       return;
     }
     if (Math.abs(dx) > 80) {
-      flingOut(dx, () => { applyTransform("none", "none"); setIdx((i) => i + 1); });
+      if (dx < 0) {
+        flingOut(dx, () => {
+          applyTransform("none", "none");
+          setIdx((i) => Math.min(i + 1, counterpartsRef.current.length - 1));
+        });
+      } else {
+        flingOut(dx, () => {
+          applyTransform("none", "none");
+          setIdx((i) => Math.max(0, i - 1));
+        });
+      }
       return;
     }
     springBack();
@@ -190,13 +201,13 @@ export default function SellerMatchPage({ params }: { params: Promise<{ id: stri
     setMatchedName(snap.company_name);
     setMatchedGrad(grad);
     setMatchedInitials(ini);
-    setIdx((i) => i + 1);
+    setCounterparts((prev) => prev.filter((c) => c.id !== snap.id));
     setScreen("celebration");
     if ("vibrate" in navigator) navigator.vibrate([10, 50, 20]);
     await fetch(`/api/events/${eventId}/matches`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ counterpart_id: snap.id }),
+      body: JSON.stringify({ seller_id: snap.id }),
     }).catch(() => {});
     setRequesting(false);
   }
@@ -421,7 +432,7 @@ export default function SellerMatchPage({ params }: { params: Promise<{ id: stri
                   </>
                 )}
                 <button
-                  onClick={() => { currentRef.current = current; doMatch(); setScreen("deck"); }}
+                  onClick={() => { currentRef.current = current; doMatch(); }}
                   disabled={requesting}
                   className="w-full flex items-center justify-center gap-2 rounded-2xl text-white font-black text-[15px] mt-6 disabled:opacity-50 active:scale-[.97] transition-transform"
                   style={{ padding: "16px", background: "linear-gradient(135deg,#2E7FD9,#06B6D4,#14B8A6)", boxShadow: "0 4px 24px rgba(6,182,212,.45)" }}
@@ -468,7 +479,7 @@ export default function SellerMatchPage({ params }: { params: Promise<{ id: stri
               <h2 className="text-[24px] font-black text-white mb-2 leading-tight" style={{ fontFamily: "'Sora','Inter',sans-serif" }}>{selectedProduct.name}</h2>
               <p className="text-[13px] leading-relaxed mb-5" style={{ color: "rgba(255,255,255,.55)" }}>{selectedProduct.description ?? "No description available."}</p>
               <button
-                onClick={() => { currentRef.current = current; doMatch(); setScreen("deck"); }}
+                onClick={() => { currentRef.current = current; doMatch(); }}
                 disabled={requesting}
                 className="w-full flex items-center justify-center gap-2 rounded-2xl text-white font-black text-[15px] mt-2 disabled:opacity-50 active:scale-[.97] transition-transform"
                 style={{ padding: "16px", background: "linear-gradient(135deg,#2E7FD9,#06B6D4,#14B8A6)", boxShadow: "0 4px 24px rgba(6,182,212,.40)" }}
