@@ -22,29 +22,30 @@ export async function GET(request: NextRequest, { params }: Params) {
 
   const counterpartRole = me.role === "buyer" ? "seller" : "buyer";
 
-  // Get all active counterparts in this event
-  const { data: participants, error } = await supabase
-    .from("event_participants")
-    .select(
-      `user_id,
-       users (
-         id, name, company_name, bio, logo_url, website_url, tags, industry_id,
-         industries ( id, name )
-       )`
-    )
-    .eq("event_id", eventId)
-    .eq("role_in_event", counterpartRole)
-    .eq("is_active", true);
+  // Fetch participants and existing matches in parallel
+  const [{ data: participants, error }, { data: existingMatches }] = await Promise.all([
+    supabase
+      .from("event_participants")
+      .select(
+        `user_id,
+         users (
+           id, name, company_name, bio, logo_url, website_url, tags, industry_id,
+           industries ( id, name )
+         )`
+      )
+      .eq("event_id", eventId)
+      .eq("role_in_event", counterpartRole)
+      .eq("is_active", true)
+      .neq("user_id", user.id),
+    supabase
+      .from("match_requests")
+      .select("buyer_id, seller_id, status")
+      .eq("event_id", eventId)
+      .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
+      .not("status", "in", '("cancelled","declined")'),
+  ]);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-
-  // Get existing match requests from current user in this event
-  const { data: existingMatches } = await supabase
-    .from("match_requests")
-    .select("buyer_id, seller_id, status")
-    .eq("event_id", eventId)
-    .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
-    .not("status", "in", '("cancelled","declined")');
 
   const requestedSet = new Set(
     (existingMatches ?? []).map((m) =>
