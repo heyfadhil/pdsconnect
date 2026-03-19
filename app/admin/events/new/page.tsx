@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/admin/PageHeader";
 import Link from "next/link";
+import ImageUpload from "@/components/ui/ImageUpload";
 
 type FormState = {
   name: string;
@@ -101,11 +102,13 @@ export default function NewEventPage() {
           </div>
 
           <div>
-            <label className={labelClass}>Thumbnail URL <span className="font-normal text-mid-gray">(optional)</span></label>
-            <input value={form.thumbnail_url} onChange={set("thumbnail_url")} placeholder="https://…" className={inputClass} />
-            {form.thumbnail_url && (
-              <img src={form.thumbnail_url} alt="Thumbnail preview" className="mt-2 h-20 w-auto rounded-lg border border-light-border object-cover" />
-            )}
+            <label className={labelClass}>Event Thumbnail <span className="font-normal text-mid-gray">(optional)</span></label>
+            <ImageUpload
+              bucket="event-thumbnails"
+              value={form.thumbnail_url}
+              onChange={(url) => setForm((p) => ({ ...p, thumbnail_url: url }))}
+              label="Upload Thumbnail"
+            />
           </div>
         </div>
 

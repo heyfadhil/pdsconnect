@@ -5,6 +5,7 @@ import Link from "next/link";
 import UserNav from "@/components/user/UserNav";
 import { createClient } from "@/lib/supabase/client";
 import { BookOpen, Plus, Pencil, Trash2, X, Check, ExternalLink } from "lucide-react";
+import FileUpload from "@/components/ui/FileUpload";
 
 interface Catalogue {
   id: string;
@@ -60,7 +61,7 @@ export default function CataloguesLibraryPage() {
 
   async function handleSave() {
     if (!form.name.trim()) { setError("Name is required."); return; }
-    if (!form.file_url.trim()) { setError("File URL is required."); return; }
+    if (!form.file_url.trim()) { setError("Please upload a catalogue file."); return; }
     setSaving(true);
     setError("");
     const method = editingId ? "PUT" : "POST";
@@ -122,8 +123,13 @@ export default function CataloguesLibraryPage() {
                 <input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} placeholder="e.g. 2026 Product Catalogue" className={inputClass} />
               </div>
               <div>
-                <label className="block text-[12px] font-semibold text-[#4B5563] mb-1.5">PDF / File URL <span className="text-[#06B6D4]">*</span></label>
-                <input value={form.file_url} onChange={(e) => setForm((p) => ({ ...p, file_url: e.target.value }))} placeholder="https://… (Google Drive, Dropbox, etc.)" className={inputClass} />
+                <label className="block text-[12px] font-semibold text-[#4B5563] mb-1.5">PDF File <span className="text-[#06B6D4]">*</span></label>
+                <FileUpload
+                  bucket="catalogues"
+                  value={form.file_url}
+                  onChange={(url) => setForm((p) => ({ ...p, file_url: url }))}
+                  label="Upload PDF"
+                />
               </div>
               {error && <p className="text-[13px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
               <div className="flex gap-2 pt-1">

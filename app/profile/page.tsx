@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import UserNav from "@/components/user/UserNav";
 import { Save, Lock, Building2, Tag } from "lucide-react";
+import ImageUpload from "@/components/ui/ImageUpload";
 
 interface Profile {
   id: string;
@@ -219,22 +220,14 @@ export default function ProfilePage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-body-sm font-medium text-ink-gray">Logo URL</label>
-              <input
-                type="url"
+              <label className="text-body-sm font-medium text-ink-gray">Company Logo</label>
+              <ImageUpload
+                bucket="logos"
                 value={logoUrl}
-                onChange={(e) => setLogoUrl(e.target.value)}
-                placeholder="https://yourcompany.com/logo.png"
-                className="border border-light-border rounded-xl px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-calm-blue"
+                onChange={setLogoUrl}
+                label="Upload Logo"
+                previewClass="h-16"
               />
-              {logoUrl && (
-                <img
-                  src={logoUrl}
-                  alt="Logo preview"
-                  className="mt-1 h-14 w-auto object-contain rounded-lg border border-light-border"
-                  onError={(e) => (e.currentTarget.style.display = "none")}
-                />
-              )}
             </div>
 
             <div className="flex flex-col gap-1.5">

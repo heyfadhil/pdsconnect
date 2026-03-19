@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import PageHeader from "@/components/admin/PageHeader";
+import ImageUpload from "@/components/ui/ImageUpload";
 
 type Event = {
   id: string; name: string; description: string | null;
@@ -141,11 +142,13 @@ export default function EventDetailPage() {
                 <div><label className={labelClass}>Max Matches / Seller</label><input type="number" min="1" value={form.max_matches_per_seller ?? ""} onChange={set("max_matches_per_seller")} placeholder="No limit" className={inputClass} /></div>
               </div>
               <div>
-                <label className={labelClass}>Thumbnail URL</label>
-                <input value={form.thumbnail_url ?? ""} onChange={set("thumbnail_url")} placeholder="https://…" className={inputClass} />
-                {form.thumbnail_url && (
-                  <img src={form.thumbnail_url} alt="Thumbnail preview" className="mt-2 h-20 w-auto rounded-lg border border-light-border object-cover" />
-                )}
+                <label className={labelClass}>Event Thumbnail</label>
+                <ImageUpload
+                  bucket="event-thumbnails"
+                  value={form.thumbnail_url ?? ""}
+                  onChange={(url) => setForm((p) => ({ ...p, thumbnail_url: url || null }))}
+                  label="Upload Thumbnail"
+                />
               </div>
               {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>}
               <div className="flex gap-3 pt-2">

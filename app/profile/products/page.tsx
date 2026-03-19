@@ -5,6 +5,7 @@ import Link from "next/link";
 import UserNav from "@/components/user/UserNav";
 import { createClient } from "@/lib/supabase/client";
 import { Package, Plus, Pencil, Trash2, X, Check } from "lucide-react";
+import ImageUpload from "@/components/ui/ImageUpload";
 
 interface Product {
   id: string;
@@ -136,11 +137,14 @@ export default function ProductsLibraryPage() {
                 <textarea value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} rows={3} placeholder="Brief description…" className={`${inputClass} h-auto resize-none`} />
               </div>
               <div>
-                <label className="block text-[12px] font-semibold text-[#4B5563] mb-1.5">Image URL <span className="text-[#9CA3AF] font-normal">(optional)</span></label>
-                <input value={form.thumbnail_url} onChange={(e) => setForm((p) => ({ ...p, thumbnail_url: e.target.value }))} placeholder="https://…" className={inputClass} />
-                {form.thumbnail_url && (
-                  <img src={form.thumbnail_url} alt="Preview" className="mt-2 h-16 w-auto rounded-lg border border-[#E5E7EB] object-cover" />
-                )}
+                <label className="block text-[12px] font-semibold text-[#4B5563] mb-1.5">Product Image <span className="text-[#9CA3AF] font-normal">(optional)</span></label>
+                <ImageUpload
+                  bucket="product-images"
+                  value={form.thumbnail_url}
+                  onChange={(url) => setForm((p) => ({ ...p, thumbnail_url: url }))}
+                  label="Upload Image"
+                  previewClass="h-16"
+                />
               </div>
               {error && <p className="text-[13px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
               <div className="flex gap-2 pt-1">
