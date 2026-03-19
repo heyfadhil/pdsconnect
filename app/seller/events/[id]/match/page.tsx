@@ -10,6 +10,7 @@ interface Counterpart {
   company_name: string;
   bio?: string | null;
   logo_url?: string | null;
+  banner_url?: string | null;
   tags?: string | null;
   industries?: { id: string; name: string } | null;
   already_requested: boolean;
@@ -564,8 +565,17 @@ function CardContent({ s, grad }: { s: Counterpart; grad: string }) {
   return (
     <>
       <div className="h-[160px] relative overflow-hidden">
-        <div className="absolute inset-0" style={{ background: grad, opacity: .85 }} />
-        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 80% 20%,rgba(255,255,255,.12),transparent 60%)" }} />
+        {s.banner_url ? (
+          <>
+            <img src={s.banner_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.45) 100%)" }} />
+          </>
+        ) : (
+          <>
+            <div className="absolute inset-0" style={{ background: grad, opacity: .85 }} />
+            <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 80% 20%,rgba(255,255,255,.12),transparent 60%)" }} />
+          </>
+        )}
         {s.logo_url ? (
           <img src={s.logo_url} alt={s.company_name} className="absolute bottom-4 left-5 w-14 h-14 rounded-2xl object-cover" style={{ border: "2.5px solid rgba(255,255,255,.30)" }} />
         ) : (

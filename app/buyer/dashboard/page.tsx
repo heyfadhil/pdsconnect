@@ -1,7 +1,6 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import EventCard from "@/components/user/EventCard";
 import { CalendarDays, MapPin, Calendar, Zap } from "lucide-react";
 
@@ -121,29 +120,51 @@ function MobileEventCard({ event }: { event: EventData }) {
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
-export default function BuyerDashboard() {
-  const [events, setEvents] = useState<EventData[]>([]);
-  const [loading, setLoading] = useState(true);
+export default async function BuyerDashboard() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
-  useEffect(() => {
-    fetch("/api/user/events")
-      .then((r) => r.json())
-      .then((d) => setEvents(d.events ?? []))
-      .finally(() => setLoading(false));
-  }, []);
+  const { data } = await supabase
+    .from("event_participants")
+    .select(
+      `role_in_event,
+       events (
+         id, name, venue_name,
+         event_start_date, event_end_date,
+         matchup_open_date, matchup_close_date,
+         status, thumbnail_url
+       )`
+    )
+    .eq("user_id", user.id)
+    .eq("is_active", true);
+
+  type EventRow = {
+    id: string; name: string; venue_name: string | null;
+    event_start_date: string | null; event_end_date: string | null;
+    matchup_open_date: string | null; matchup_close_date: string | null;
+    status: string; thumbnail_url: string | null;
+  };
+
+  const today = new Date().toISOString().split("T")[0];
+  const events: EventData[] = (data ?? [])
+    .filter((p) => p.events)
+    .map((p) => {
+      const ev = p.events as unknown as EventRow;
+      const withinWindow =
+        ev.matchup_open_date != null &&
+        ev.matchup_open_date <= today &&
+        (ev.matchup_close_date == null || ev.matchup_close_date >= today);
+      const isActive = ev.status === "live" && withinWindow;
+      return { ...ev, role_in_event: p.role_in_event as "buyer" | "seller", isActive };
+    })
+    .sort((a, b) => {
+      if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
+      return (b.event_start_date ?? "").localeCompare(a.event_start_date ?? "");
+    });
 
   const active = events.filter((e) => e.isActive);
   const archived = events.filter((e) => !e.isActive);
-
-  if (loading) {
-    return (
-      <div className="flex flex-col gap-4">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="h-32 rounded-2xl animate-pulse" style={{ background: "rgba(216,230,245,0.5)" }} />
-        ))}
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col gap-6 md:gap-8">
@@ -162,7 +183,6 @@ export default function BuyerDashboard() {
             ? "No events assigned yet."
             : `${events.length} event${events.length !== 1 ? "s" : ""} registered`}
         </p>
-        {/* Decorative glow */}
         <div className="absolute right-0 top-0 w-40 h-40 pointer-events-none" style={{ background: "radial-gradient(circle,rgba(0,212,255,.12) 0%,transparent 70%)" }} />
       </div>
 
@@ -177,7 +197,6 @@ export default function BuyerDashboard() {
 
       {events.length === 0 ? (
         <>
-          {/* Mobile empty state */}
           <div className="md:hidden flex flex-col items-center gap-4 text-center py-12">
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)" }}>
               <CalendarDays size={28} strokeWidth={1.5} style={{ color: "rgba(255,255,255,.35)" }} />
@@ -187,7 +206,6 @@ export default function BuyerDashboard() {
               <p className="text-[13px]" style={{ color: "rgba(255,255,255,.45)" }}>You haven&apos;t been assigned to any events.</p>
             </div>
           </div>
-          {/* Desktop empty state */}
           <div className="hidden md:flex rounded-2xl p-12 flex-col items-center gap-4 text-center"
             style={{ background: "#FFFFFF", border: "1px solid #D8E6F5", boxShadow: "0 2px 12px rgba(46,127,217,0.06)" }}>
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: "#EEF5FC" }}>
@@ -212,15 +230,12 @@ export default function BuyerDashboard() {
                 </div>
                 <div
                   className="flex gap-3 overflow-x-auto pb-2 -mx-6 px-6 snap-x snap-mandatory"
-                  style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
+                  style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
                 >
-                  {active.map((e) => (
-                    <MobileEventCard key={e.id} event={e} />
-                  ))}
+                  {active.map((e) => <MobileEventCard key={e.id} event={e} />)}
                 </div>
               </div>
             )}
-
             {archived.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-3">
@@ -230,11 +245,9 @@ export default function BuyerDashboard() {
                 </div>
                 <div
                   className="flex gap-3 overflow-x-auto pb-2 -mx-6 px-6 snap-x snap-mandatory"
-                  style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
+                  style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
                 >
-                  {archived.map((e) => (
-                    <MobileEventCard key={e.id} event={e} />
-                  ))}
+                  {archived.map((e) => <MobileEventCard key={e.id} event={e} />)}
                 </div>
               </div>
             )}
@@ -250,13 +263,10 @@ export default function BuyerDashboard() {
                   <span className="text-[12px] font-semibold px-2 py-0.5 rounded-full ml-1" style={{ background: "#ECFDF5", color: "#059669" }}>{active.length}</span>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {active.map((e) => (
-                    <EventCard key={e.id} event={{ ...e, role_in_event: "buyer" }} />
-                  ))}
+                  {active.map((e) => <EventCard key={e.id} event={{ ...e, role_in_event: "buyer" }} />)}
                 </div>
               </section>
             )}
-
             {archived.length > 0 && (
               <section>
                 <div className="flex items-center gap-2 mb-4">
@@ -265,9 +275,7 @@ export default function BuyerDashboard() {
                   <span className="text-[12px] font-semibold px-2 py-0.5 rounded-full ml-1" style={{ background: "#F3F4F6", color: "#6B7280" }}>{archived.length}</span>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {archived.map((e) => (
-                    <EventCard key={e.id} event={{ ...e, role_in_event: "buyer" }} />
-                  ))}
+                  {archived.map((e) => <EventCard key={e.id} event={{ ...e, role_in_event: "buyer" }} />)}
                 </div>
               </section>
             )}

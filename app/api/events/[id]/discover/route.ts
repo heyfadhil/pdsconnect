@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, { params }: Params) {
       .select(
         `user_id,
          users (
-           id, name, company_name, bio, logo_url, website_url, tags, industry_id,
+           id, name, company_name, bio, logo_url, banner_url, website_url, tags, industry_id,
            industries ( id, name )
          )`
       )
@@ -59,6 +59,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     company_name: string;
     bio: string | null;
     logo_url: string | null;
+    banner_url: string | null;
     website_url: string | null;
     tags: string | null;
     industry_id: string | null;

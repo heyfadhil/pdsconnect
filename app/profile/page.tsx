@@ -15,6 +15,7 @@ interface Profile {
   role: "buyer" | "seller";
   bio?: string | null;
   logo_url?: string | null;
+  banner_url?: string | null;
   website_url?: string | null;
   tags?: string | null;
   industries?: { name: string } | null;
@@ -30,6 +31,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [bio, setBio] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
+  const [bannerUrl, setBannerUrl] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [phone, setPhone] = useState("");
   const [mobile, setMobile] = useState("");
@@ -52,6 +54,7 @@ export default function ProfilePage() {
         setProfile(p);
         setBio(p.bio ?? "");
         setLogoUrl(p.logo_url ?? "");
+        setBannerUrl(p.banner_url ?? "");
         setWebsiteUrl(p.website_url ?? "");
         setPhone(p.phone ?? "");
         setMobile(p.mobile ?? "");
@@ -67,7 +70,7 @@ export default function ProfilePage() {
     const res = await fetch("/api/user/profile", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ bio, logo_url: logoUrl, website_url: websiteUrl, phone, mobile, title }),
+      body: JSON.stringify({ bio, logo_url: logoUrl, banner_url: bannerUrl, website_url: websiteUrl, phone, mobile, title }),
     });
     setSaving(false);
     if (res.ok) {
@@ -219,15 +222,29 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-body-sm font-medium text-ink-gray">Company Logo</label>
-              <ImageUpload
-                bucket="logos"
-                value={logoUrl}
-                onChange={setLogoUrl}
-                label="Upload Logo"
-                previewClass="h-16"
-              />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-body-sm font-medium text-ink-gray">Company Logo</label>
+                <p className="text-[11px] text-mid-gray">Shown as your avatar on match cards.</p>
+                <ImageUpload
+                  bucket="logos"
+                  value={logoUrl}
+                  onChange={setLogoUrl}
+                  label="Upload Logo"
+                  previewClass="h-16"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-body-sm font-medium text-ink-gray">Profile Banner</label>
+                <p className="text-[11px] text-mid-gray">Displayed as the card header background.</p>
+                <ImageUpload
+                  bucket="banners"
+                  value={bannerUrl}
+                  onChange={setBannerUrl}
+                  label="Upload Banner"
+                  previewClass="h-16"
+                />
+              </div>
             </div>
 
             <div className="flex flex-col gap-1.5">

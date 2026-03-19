@@ -9,6 +9,7 @@ interface Profile {
   company_name: string;
   bio?: string | null;
   logo_url?: string | null;
+  banner_url?: string | null;
   website_url?: string | null;
   tags?: string | null;
   industries?: { name: string } | null;
@@ -116,38 +117,54 @@ export default function ProfileModal({
             <div className="grid lg:grid-cols-[320px_1fr]">
 
               {/* ── Left column: Profile info ── */}
-              <div className="p-8 flex flex-col gap-5 border-b lg:border-b-0 lg:border-r" style={{ borderColor: "rgba(6,182,212,0.12)" }}>
-                {/* Logo + Name */}
-                <div className="flex items-center gap-4">
-                  {profile.logo_url ? (
-                    <img
-                      src={profile.logo_url}
-                      alt={profile.company_name}
-                      className="w-16 h-16 rounded-xl object-contain flex-shrink-0"
-                      style={{ border: "1px solid rgba(6,182,212,0.2)", background: "#F8FAFE" }}
-                    />
-                  ) : (
-                    <div
-                      className="w-16 h-16 rounded-xl flex items-center justify-center text-white font-display font-bold text-xl flex-shrink-0"
-                      style={{ background: "linear-gradient(135deg, #2E7FD9 0%, #06B6D4 100%)" }}
-                    >
-                      {profile.company_name.charAt(0)}
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <h2 className="font-display font-bold text-[20px] text-[#0D0D0D] leading-tight">
-                      {profile.company_name}
-                    </h2>
-                    {profile.industries?.name && (
-                      <span
-                        className="inline-block mt-1.5 px-2.5 py-0.5 text-[11px] font-semibold rounded-full uppercase tracking-wide"
-                        style={{ background: "#ECFEFF", color: "#06B6D4" }}
+              <div className="flex flex-col gap-5 border-b lg:border-b-0 lg:border-r" style={{ borderColor: "rgba(6,182,212,0.12)" }}>
+                {/* Banner + Logo */}
+                <div className="relative">
+                  {/* Banner */}
+                  <div className="h-[100px] w-full overflow-hidden rounded-tl-[20px] rounded-tr-[20px] lg:rounded-tr-none">
+                    {profile.banner_url ? (
+                      <img src={profile.banner_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full" style={{ background: "linear-gradient(135deg,#2E7FD9,#06B6D4,#14B8A6)" }} />
+                    )}
+                    <div className="absolute inset-x-0 top-0 h-[100px]" style={{ background: "linear-gradient(180deg,transparent 40%,rgba(0,0,0,.35) 100%)" }} />
+                  </div>
+                  {/* Logo overlapping banner */}
+                  <div className="absolute left-6 -bottom-8">
+                    {profile.logo_url ? (
+                      <img
+                        src={profile.logo_url}
+                        alt={profile.company_name}
+                        className="w-16 h-16 rounded-xl object-contain"
+                        style={{ border: "3px solid white", background: "#F8FAFE", boxShadow: "0 2px 12px rgba(0,0,0,.15)" }}
+                      />
+                    ) : (
+                      <div
+                        className="w-16 h-16 rounded-xl flex items-center justify-center text-white font-display font-bold text-xl"
+                        style={{ background: "linear-gradient(135deg, #2E7FD9 0%, #06B6D4 100%)", border: "3px solid white", boxShadow: "0 2px 12px rgba(0,0,0,.15)" }}
                       >
-                        {profile.industries.name}
-                      </span>
+                        {profile.company_name.charAt(0)}
+                      </div>
                     )}
                   </div>
                 </div>
+
+                {/* Name + Industry (with top margin to clear logo overlap) */}
+                <div className="px-8 pt-10 flex flex-col gap-1">
+                  <h2 className="font-display font-bold text-[20px] text-[#0D0D0D] leading-tight">
+                    {profile.company_name}
+                  </h2>
+                  {profile.industries?.name && (
+                    <span
+                      className="inline-block mt-1 px-2.5 py-0.5 text-[11px] font-semibold rounded-full uppercase tracking-wide w-fit"
+                      style={{ background: "#ECFEFF", color: "#06B6D4" }}
+                    >
+                      {profile.industries.name}
+                    </span>
+                  )}
+                </div>
+
+                <div className="px-8 pb-8 flex flex-col gap-5 flex-1">
 
                 {/* Website */}
                 {profile.website_url && (
@@ -233,7 +250,8 @@ export default function ProfileModal({
                     )}
                   </div>
                 )}
-              </div>
+                </div>{/* end px-8 pb-8 */}
+              </div>{/* end left column */}
 
               {/* ── Right column: Products + Catalogues ── */}
               <div className="p-8 flex flex-col gap-6">

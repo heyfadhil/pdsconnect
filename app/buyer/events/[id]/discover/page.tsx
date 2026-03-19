@@ -10,6 +10,7 @@ interface Counterpart {
   company_name: string;
   bio?: string | null;
   logo_url?: string | null;
+  banner_url?: string | null;
   website_url?: string | null;
   tags?: string | null;
   industry_id?: string | null;
