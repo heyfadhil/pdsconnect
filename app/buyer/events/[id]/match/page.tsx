@@ -218,11 +218,15 @@ export default function BuyerMatchPage({ params }: { params: Promise<{ id: strin
     setCounterparts((prev) => prev.filter((c) => c.id !== snap.id));
     setScreen("celebration");
     if ("vibrate" in navigator) navigator.vibrate([10, 50, 20]);
-    await fetch(`/api/events/${eventId}/matches`, {
+    const res = await fetch(`/api/events/${eventId}/matches`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ seller_id: snap.id }),
-    }).catch(() => {});
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.error("Match request failed:", err);
+    }
     setRequesting(false);
   }
 
